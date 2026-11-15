@@ -7,7 +7,7 @@ function renderHome(){
  const official=results.filter(x=>races.some(r=>r.id===x.race_id&&r.status==='official'));
  const total=id=>official.filter(r=>r.driver_id===id).reduce((n,r)=>n+Number(r.points||0),0);
  let entries;
- if(homeType==='drivers')entries=drivers.filter(d=>d.league===homeLeague).map(d=>({name:d.gamertag,team:teams.find(t=>t.id===d.team_id)?.name||'WILD',teamObj:teams.find(t=>t.id===d.team_id),points:total(d.id)}));
+ if(homeType==='drivers')entries=drivers.filter(d=>!d.archived&&d.league===homeLeague).map(d=>({name:d.gamertag,team:teams.find(t=>t.id===d.team_id)?.name||'WILD',teamObj:teams.find(t=>t.id===d.team_id),points:total(d.id)}));
  else entries=teams.map(t=>({name:t.name,team:'',teamObj:t,points:official.filter(r=>{const d=drivers.find(d=>d.id===r.driver_id);const race=races.find(g=>g.id===r.race_id);return race?.league===homeLeague&&(r.team_id??d?.team_id)===t.id}).reduce((n,r)=>n+Number(r.points||0),0)}));
  entries.sort((a,b)=>b.points-a.points||a.name.localeCompare(b.name));
  document.getElementById('home-leaderboard').innerHTML=entries.length?`<table class="home-table"><thead><tr><th>#</th><th>${homeType==='drivers'?'Pilota':'Scuderia'}</th><th>Punti</th></tr></thead><tbody>${entries.slice(0,6).map((x,i)=>`<tr><td><span class="rank ${i===0?'first':''}">${i+1}</span></td><td><div class="home-standing-person">${hydraTeamMark(x.teamObj)}<span><strong>${esc(x.name)}</strong>${x.team?`<small>${esc(x.team)}</small>`:""}</span></div></td><td class="points">${x.points}</td></tr>`).join('')}</tbody></table>`:'<p class="empty">Nessuna classifica disponibile.</p>';
