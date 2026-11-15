@@ -218,3 +218,7 @@
 .home-standing-person .team-mini-logo{width:43px;min-width:43px;height:35px;padding:5px}
 .last-top-row .team-mini-logo{width:39px;min-width:39px;height:30px;padding:4px}
 @media(max-width:760px){.hydra-standings .team-mini-logo{width:43px;min-width:43px}}
+
+/* 4.0.6.2 — No light tiles: preserve the three original emblems in grayscale. */
+.team-mini-logo--detailed{background:transparent!important;border-radius:0!important;padding:7px 5px!important}
+.team-mini-logo--detailed img{filter:grayscale(1) brightness(1.35) contrast(1.25)!important}
