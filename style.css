@@ -226,3 +226,9 @@
 /* Hydra 4.0.6.3: Cadillac white symbol, no light tile; Twitch official asset. */
 .team-mini-logo--cadillac img{filter:grayscale(1) brightness(0) invert(1)!important}
 .twitch-official-logo{display:block;width:72px;height:72px;object-fit:contain;margin:0 auto 14px;border-radius:15px}
+
+/* 4.0.6.4: Twitch logo aligned beside HYDRA LIVE */
+.live-panel .hydra-live-title{display:flex;align-items:center;justify-content:flex-start;gap:15px;flex-wrap:nowrap}
+.live-panel .hydra-live-title .twitch-official-logo{width:58px;height:58px;flex:0 0 58px;object-fit:contain;margin:0;border-radius:12px}
+.live-panel .hydra-live-title span{white-space:nowrap}
+@media(max-width:460px){.live-panel .hydra-live-title{gap:10px}.live-panel .hydra-live-title .twitch-official-logo{width:46px;height:46px;flex-basis:46px}}
