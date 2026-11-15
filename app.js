@@ -43,6 +43,7 @@ function calendarDate(raw){
 function calendarStatus(r){
  return r?.status==='official'?'CONCLUSA':r?.status==='provisional'?'PROVVISORIA':r?.status==='scheduled'?'IN PROGRAMMA':'DA DEFINIRE';
 }
+const calendarPhotos={1: "https://commons.wikimedia.org/wiki/Special:FilePath/Albert%20Park%20%26%20Australia%20Grand%20Prix%20Circuit.jpg?width=960", 2: "https://commons.wikimedia.org/wiki/Special:FilePath/Jeddah%20Corniche%20Circuit%20viewed%20from%20above.png?width=960", 3: "https://commons.wikimedia.org/wiki/Special:FilePath/Silverstone%20Circuit%20%2814624952224%29.jpg?width=960", 4: "https://commons.wikimedia.org/wiki/Special:FilePath/Circuit%20de%20Spa-Francorchamps%2C%20April%2022%2C%202018%20SkySat%20%28cropped%29.jpg?width=960", 5: "https://commons.wikimedia.org/wiki/Special:FilePath/Circuit%20Park%20Zandvoort%20aerial%20photo.jpg?width=960", 7: "https://commons.wikimedia.org/wiki/Special:FilePath/Circuit%20de%20Barcelona-Catalunya%2C%20April%2019%2C%202018%20SkySat%20%28cropped%29.jpg?width=960", 8: "https://commons.wikimedia.org/wiki/Special:FilePath/Marina%20Bay%20Street%20Circuit%2C%20May%208%2C%202018%20SkySat%20%28cropped%29.jpg?width=960", 9: "https://commons.wikimedia.org/wiki/Special:FilePath/Circuit%20of%20the%20Americas%2C%20April%2022%2C%202018%20SkySat%20%28cropped2%29.jpg?width=960", 12: "https://commons.wikimedia.org/wiki/Special:FilePath/Yas%20Marina%20Circuit%2C%20October%2012%2C%202018%20SkySat%20%28cropped%29.jpg?width=960"};
 const calendarFlags={1:'🇦🇺',2:'🇸🇦',3:'🇬🇧',4:'🇧🇪',5:'🇳🇱',6:'❔',7:'🇪🇸',8:'🇸🇬',9:'🇺🇸',10:'🇺🇸',11:'🇮🇹',12:'🇦🇪'};
 function renderCalendar(races,results){
  const byRound=new Map();
@@ -65,7 +66,7 @@ function renderCalendar(races,results){
   }).join('');
   return `<button type="button" class="calendar-card ${isNext?'calendar-card-next':''} ${done?'calendar-card-done':''} ${calendarSelectedRound===n?'calendar-card-active':''}" data-calendar-round="${n}" aria-expanded="${calendarSelectedRound===n?'true':'false'}">
     <div class="calendar-card-top"><span><span class="calendar-country-flag" aria-label="Bandiera del paese ospitante">${calendarFlags[n]||'🏁'}</span> ROUND ${String(n).padStart(2,'0')}</span><span class="calendar-card-badge">${badge}</span></div>
-    <div class="calendar-card-art" aria-hidden="true"><img src="circuit-${String(n).padStart(2,'0')}.svg" alt="" loading="lazy" decoding="async"><span class="calendar-art-number">${String(n).padStart(2,'0')}</span></div>
+    <div class="calendar-card-art" aria-hidden="true"><img src="${calendarPhotos[n]||'circuit-06.svg'}" alt="Vista del circuito" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='circuit-06.svg'"><span class="calendar-art-number">${String(n).padStart(2,'0')}</span></div>
     <div class="calendar-card-main"><h3>${esc(circuitFor(rr))}</h3><p>HYDRA GRAND PRIX</p></div>
     <div class="calendar-leagues">${leagues}</div><div class="calendar-card-foot">DETTAGLI E RISULTATI <span>↗</span></div></button>`;
  }).join('')||'<p class="empty">Nessun Gran Premio ancora inserito.</p>';

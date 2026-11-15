@@ -88,3 +88,6 @@
 .calendar-card:hover .calendar-card-art img{transform:scale(1.055)}
 .calendar-art-number{pointer-events:none}
 @media(max-width:650px){.calendar-card-art{height:140px}}
+
+.calendar-card-art img{object-fit:cover;filter:brightness(.82) saturate(1.12)}
+.calendar-card:hover .calendar-card-art img{filter:brightness(.95) saturate(1.15)}
