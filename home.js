@@ -1,6 +1,6 @@
 'use strict';
 // Homepage enhancement: uses the same read-only data loaded by app.js.
-let homeLeague='A',homeType='drivers';
+let homeLeague='A',homeType='drivers',lastLeague='A';
 function homePhoto(selector,n){const el=document.querySelector(selector),src=calendarPhotos[Number(n)];if(el&&src){el.style.backgroundImage=`linear-gradient(0deg,rgba(5,15,24,.83),rgba(5,15,24,.15)),url('${src}')`;el.style.backgroundSize='cover';el.style.backgroundPosition='center'}}
 function renderHome(){
  const drivers=data.hydra_drivers||[],teams=data.hydra_teams||[],races=data.hydra_races||[],results=data.hydra_results||[];
@@ -15,10 +15,14 @@ function renderHome(){
  const today=new Date().toISOString().slice(0,10);const next=dated.find(r=>r.race_date>=today&&r.status==='scheduled');
  if(next){homePhoto('.race-visual',next.round_number);document.getElementById('home-race-title').textContent=next.circuit;document.getElementById('home-race-sub').textContent=`ROUND ${String(next.round_number).padStart(2,'0')} · LEGA ${next.league}`;document.getElementById('home-race-date').textContent=new Date(next.race_date+'T12:00:00').toLocaleDateString('it-IT',{day:'numeric',month:'long',year:'numeric'});document.getElementById('home-race-status').textContent='Appuntamento in calendario · orario da verificare';}
  else {document.getElementById('home-race-title').textContent='CALENDARIO UFFICIALE';document.getElementById('home-race-sub').textContent='Le gare del campionato Hydra';document.getElementById('home-race-date').textContent='Prossima data da confermare';document.getElementById('home-race-status').textContent='Consulta il calendario per le gare registrate.';}
- const last=[...races].filter(r=>r.status==='official'&&results.some(x=>x.race_id===r.id)).sort((a,b)=>b.round_number-a.round_number||b.id-a.id)[0];
- if(last){homePhoto('.race-mini-art',last.round_number);document.getElementById('home-last-title').textContent=last.circuit;document.getElementById('home-last-meta').textContent=`ROUND ${last.round_number} · LEGA ${last.league} · Risultati registrati`;}
+ const last=[...races].filter(r=>r.league===lastLeague&&r.status==='official'&&results.some(x=>String(x.race_id)===String(r.id))).sort((a,b)=>b.round_number-a.round_number||String(b.race_date||'').localeCompare(String(a.race_date||'')))[0];
+ const title=document.getElementById('home-last-title'),meta=document.getElementById('home-last-meta'),top=document.getElementById('home-last-top');
+ if(last){title.textContent=last.circuit;meta.textContent=`ROUND ${last.round_number} · LEGA ${lastLeague} · RISULTATI UFFICIALI`;const rows=results.filter(x=>String(x.race_id)===String(last.id)&&Number(x.finishing_position)>0&&x.status==='classified').sort((a,b)=>Number(a.finishing_position)-Number(b.finishing_position)).slice(0,5);top.innerHTML=rows.length?rows.map(r=>{const d=drivers.find(x=>String(x.id)===String(r.driver_id));const t=teams.find(x=>String(x.id)===String(r.team_id));return `<button type="button" class="last-top-row" data-profile-id="${esc(r.driver_id)}"><span class="last-pos">${esc(r.finishing_position)}°</span>${hydraTeamMark(t)}<span class="last-top-name"><strong>${esc(d?.gamertag||'Pilota')}</strong><small>${esc(t?.name||'WILD')}</small></span><b>${Number(r.points)||0} pt</b></button>`}).join(''):'<p class="empty">Classifica non disponibile.</p>'}
+ else {title.textContent=`Lega ${lastLeague}`;meta.textContent='Nessun Gran Premio ufficiale registrato';top.innerHTML='<p class="empty">I primi cinque classificati compariranno dopo la pubblicazione dei risultati.</p>';}
 }
 document.querySelectorAll('[data-home-league]').forEach(b=>b.addEventListener('click',()=>{homeLeague=b.dataset.homeLeague;document.querySelectorAll('[data-home-league]').forEach(x=>x.classList.toggle('selected',x===b));renderHome()}));
 document.querySelectorAll('[data-home-type]').forEach(b=>b.addEventListener('click',()=>{homeType=b.dataset.homeType;document.querySelectorAll('[data-home-type]').forEach(x=>x.classList.toggle('selected',x===b));renderHome()}));
 const originalRender=render;render=function(){originalRender();renderHome()};
 if(data.hydra_teams)renderHome();
+
+document.querySelectorAll("[data-last-league]").forEach(b=>b.addEventListener("click",()=>{lastLeague=b.dataset.lastLeague;document.querySelectorAll("[data-last-league]").forEach(x=>x.classList.toggle("selected",x===b));renderHome()}));
