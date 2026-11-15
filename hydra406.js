@@ -16,28 +16,48 @@ let chartSelection=new Set(),chartContext='';
 const colors=['#d4b474','#58b6f8','#f09c7d','#90d2b1','#c49bf5','#e5e6ed','#ffcc4f','#9cbded','#f18caf','#a7d9a1','#ff7b8e'];
 function progressChart(){
  const host=qs('#progress-svg');if(!host)return;
- const mode=qs('#progress-mode').value;const isGeneral=league==='GENERAL';const teams=data.hydra_teams||[],drivers=(data.hydra_drivers||[]).filter(d=>!d.archived&&d.league===league);
- const items=isGeneral?teams:drivers;
- const context=league+':'+items.length;
- if(context!==chartContext){chartContext=context;chartSelection=new Set((isGeneral?items:items.slice(0,5)).map(x=>String(x.id)))}
+ const mode=qs('#progress-mode').value,isGeneral=league==='GENERAL',entity= isGeneral?'teams':qs('#progress-entity').value;
+ const wrap=qs('#progress-entity-wrap');if(wrap)wrap.hidden=isGeneral;
+ const teams=data.hydra_teams||[],drivers=(data.hydra_drivers||[]).filter(d=>!d.archived&&d.league===league);
+ const items=entity==='teams'?teams:drivers;
+ const context=league+':'+entity+':'+items.map(x=>x.id).join(',');
+ if(context!==chartContext){chartContext=context;chartSelection=new Set((entity==='teams'?items:items.slice(0,6)).map(x=>String(x.id)))}
  const races=officialRaces().filter(r=>isGeneral||r.league===league);
  const rounds=[...new Set(races.map(r=>Number(r.round_number)))].sort((a,b)=>a-b);
- const byRace=new Map(races.map(r=>[String(r.id),r]));const result=data.hydra_results||[];
- const totals=new Map(items.map(i=>[String(i.id),0]));const series=items.map(i=>({id:String(i.id),name:i.name||i.gamertag,color:isGeneral?hydraTeamColor(i.name):hydraTeamColor(teams.find(t=>String(t.id)===String(i.team_id))?.name),values:[]}));
- for(const round of rounds){for(const r of result){const race=byRace.get(String(r.race_id));if(!race||Number(race.round_number)!==round)continue;const id=isGeneral?String(r.team_id??''):String(r.driver_id);if(totals.has(id))totals.set(id,totals.get(id)+Number(r.points||0));}
-  const sorted=[...totals].sort((a,b)=>b[1]-a[1]||items.find(i=>String(i.id)===a[0])?.name?.localeCompare(items.find(i=>String(i.id)===b[0])?.name||'')||a[0].localeCompare(b[0]));const ranks=new Map(sorted.map(([id],i)=>[id,i+1]));
-  series.forEach(s=>s.values.push({round,value:mode==='rank'?ranks.get(s.id):totals.get(s.id)}));}
- const filters=qs('#progress-filters');filters.innerHTML=series.map((s,i)=>`<button type="button" data-series="${htmlEscape(s.id)}" class="${chartSelection.has(s.id)?'selected':''}" style="--series-color:${s.color||colors[i%colors.length]}">${htmlEscape(s.name)}</button>`).join('');filters.querySelectorAll('button').forEach(b=>b.onclick=()=>{chartSelection.has(b.dataset.series)?chartSelection.delete(b.dataset.series):chartSelection.add(b.dataset.series);progressChart()});
- const selected=series.filter(s=>chartSelection.has(s.id));const W=900,H=360,left=52,right=18,top=22,bottom=48;
+ const byRace=new Map(races.map(r=>[String(r.id),r]));const results=data.hydra_results||[];
+ const totals=new Map(items.map(i=>[String(i.id),0]));
+ const series=items.map((i,idx)=>({id:String(i.id),name:i.name||i.gamertag,color:entity==='teams'?hydraTeamColor(i.name):colors[idx%colors.length],values:[]}));
+ for(const round of rounds){
+  for(const r of results){const race=byRace.get(String(r.race_id));if(!race||Number(race.round_number)!==round)continue;
+   const id=entity==='teams'?String(r.team_id??''):String(r.driver_id);
+   if(totals.has(id))totals.set(id,totals.get(id)+Number(r.points||0));
+  }
+  const sorted=[...totals].sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]));
+  const ranks=new Map(sorted.map(([id],i)=>[id,i+1]));
+  series.forEach(s=>s.values.push({round,value:mode==='rank'?ranks.get(s.id):totals.get(s.id)}));
+ }
+ const filters=qs('#progress-filters');
+ filters.innerHTML=series.map(s=>`<button type="button" data-series="${htmlEscape(s.id)}" class="${chartSelection.has(s.id)?'selected':''}" style="--series-color:${s.color}"><i aria-hidden="true"></i>${htmlEscape(s.name)}</button>`).join('');
+ filters.querySelectorAll('button').forEach(b=>b.onclick=()=>{chartSelection.has(b.dataset.series)?chartSelection.delete(b.dataset.series):chartSelection.add(b.dataset.series);progressChart()});
+ const selected=series.filter(s=>chartSelection.has(s.id));const W=1100,H=490,left=65,right=35,top=36,bottom=62;
  if(!rounds.length){host.setAttribute('viewBox',`0 0 ${W} ${H}`);host.innerHTML='<text x="50%" y="50%" fill="#a6b4c6" text-anchor="middle">Il grafico comparirà dopo il primo Gran Premio ufficiale.</text>';return}
  const yMax=mode==='rank'?Math.max(1,items.length):Math.max(1,...series.flatMap(s=>s.values.map(v=>v.value)));
- const x=n=>left+(W-left-right)*(rounds.length===1?.5:n/(rounds.length-1));const y=v=>top+(H-top-bottom)*(mode==='rank'?(v-1)/Math.max(1,yMax-1):1-v/yMax);
- let svg='';for(let i=0;i<=5;i++){const v=mode==='rank'?1+Math.round(i*Math.max(1,yMax-1)/5):Math.round(yMax*(5-i)/5);const yy=y(v);svg+=`<line x1="${left}" x2="${W-right}" y1="${yy}" y2="${yy}" stroke="#38516b" opacity=".6"/><text x="${left-10}" y="${yy+4}" text-anchor="end" font-size="12" fill="#a6b4c6">${v}${mode==='rank'?'°':''}</text>`}
- rounds.forEach((r,i)=>svg+=`<text x="${x(i)}" y="${H-16}" text-anchor="middle" font-size="12" fill="#d6dfea">R${r}</text>`);
- selected.forEach((s,i)=>{const col=s.color||colors[i%colors.length];svg+=`<polyline points="${s.values.map((v,j)=>`${x(j)},${y(v.value)}`).join(' ')}" fill="none" stroke="${col}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`;s.values.forEach((v,j)=>svg+=`<circle cx="${x(j)}" cy="${y(v.value)}" r="4" fill="${col}"><title>${htmlEscape(s.name)} · Round ${v.round}: ${v.value}${mode==='rank'?'°':' punti'}</title></circle>`)});
+ const x=n=>left+(W-left-right)*(rounds.length===1?.5:n/(rounds.length-1));
+ const y=v=>top+(H-top-bottom)*(mode==='rank'?(v-1)/Math.max(1,yMax-1):1-v/yMax);
+ let svg='<defs><linearGradient id="hydra-chart-fill" x1="0" x2="0" y1="0" y2="1"><stop stop-color="#193b5a" stop-opacity=".45"/><stop offset="1" stop-color="#07111e" stop-opacity=".03"/></linearGradient></defs>';
+ svg+=`<rect x="${left}" y="${top}" width="${W-left-right}" height="${H-top-bottom}" rx="12" fill="url(#hydra-chart-fill)"/>`;
+ for(let i=0;i<=5;i++){const v=mode==='rank'?1+Math.round(i*Math.max(1,yMax-1)/5):Math.round(yMax*(5-i)/5),yy=y(v);
+  svg+=`<line x1="${left}" x2="${W-right}" y1="${yy}" y2="${yy}" stroke="#4b6885" opacity=".4" stroke-dasharray="4 7"/><text x="${left-13}" y="${yy+5}" text-anchor="end" font-size="14" fill="#b4c5d8">${v}${mode==='rank'?'°':''}</text>`}
+ rounds.forEach((r,i)=>svg+=`<text x="${x(i)}" y="${H-23}" text-anchor="middle" font-size="15" font-weight="600" fill="#d6dfea">R${r}</text>`);
+ selected.forEach(s=>{const col=s.color;svg+=`<polyline points="${s.values.map((v,j)=>`${x(j)},${y(v.value)}`).join(' ')}" fill="none" stroke="${col}" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" opacity=".97"/>`;
+  s.values.forEach((v,j)=>svg+=`<circle cx="${x(j)}" cy="${y(v.value)}" r="5.2" fill="${col}" stroke="#091828" stroke-width="2"><title>${htmlEscape(s.name)} · Round ${v.round}: ${v.value}${mode==='rank'?'°':' punti'}</title></circle>`)});
+ if(!selected.length)svg+=`<text x="50%" y="50%" fill="#a6b4c6" text-anchor="middle" font-size="17">Seleziona almeno un ${entity==='teams'?'team':'pilota'} per visualizzare l’andamento.</text>`;
  host.setAttribute('viewBox',`0 0 ${W} ${H}`);host.innerHTML=svg;
 }
 qs('#progress-mode').onchange=progressChart;
+qs('#progress-entity').onchange=progressChart;
+qs('#progress-all').onclick=()=>{all('#progress-filters button').forEach(b=>chartSelection.add(b.dataset.series));progressChart()};
+qs('#progress-none').onclick=()=>{chartSelection.clear();progressChart()};
 const originalRender406=render;render=function(){originalRender406();progressChart();if(token)render406Admin()};
 // Admin: archive and permanent deletion of test records only.
 function render406Admin(){

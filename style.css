@@ -232,3 +232,29 @@
 .live-panel .hydra-live-title .twitch-official-logo{width:58px;height:58px;flex:0 0 58px;object-fit:contain;margin:0;border-radius:12px}
 .live-panel .hydra-live-title span{white-space:nowrap}
 @media(max-width:460px){.live-panel .hydra-live-title{gap:10px}.live-panel .hydra-live-title .twitch-official-logo{width:46px;height:46px;flex-basis:46px}}
+
+/* Hydra 4.0.6.5 - Hero copy refresh */
+.hero-community-tagline{font-weight:800;font-style:italic;font-size:clamp(17px,2vw,25px);line-height:1.3;letter-spacing:.15px;margin:18px 0 6px!important;color:#f4f6fa!important}
+.hero-community-subtitle{font-size:clamp(14px,1.35vw,18px);line-height:1.4;margin:0!important;color:#e3e9f0!important}
+@media(max-width:760px){.hero-community-tagline{font-size:18px;margin-top:14px!important}.hero-community-subtitle{font-size:14px}}
+
+/* 4.0.6.6: clearer, larger championship charts and regulation download */
+.race-road{display:none!important}
+.progress-panel{padding:clamp(18px,2.7vw,34px);background:linear-gradient(145deg,#102942,#0b1b30 70%);border:1px solid #405775}
+.progress-heading h3{font-size:clamp(20px,2.4vw,29px);margin:0}
+.progress-controls{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.progress-controls label{color:#dce6f1;font-size:13px;white-space:nowrap}
+.progress-controls select{margin-left:7px;background:#07111e;color:#fff;padding:10px 12px;border:1px solid #506986;border-radius:8px}
+.progress-filter-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+.progress-filter-actions button{background:#142a43;border:1px solid #45617f;border-radius:7px;color:#e2e9f3;padding:7px 12px;cursor:pointer}
+.progress-filters{gap:9px;margin:12px 0 20px}
+.progress-filters button{display:inline-flex;align-items:center;gap:8px;font-size:12px;padding:9px 13px;border-radius:9px;transition:background .15s,border-color .15s}
+.progress-filters button i{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--series-color);opacity:.45}
+.progress-filters button.selected i{opacity:1;box-shadow:0 0 0 3px #ffffff18}
+.progress-canvas{border:1px solid #2e4a68;background:#071624;border-radius:14px;padding:14px;overflow-x:auto}
+.progress-canvas svg{min-width:760px;height:490px}
+.rule-download{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;padding:20px 24px;margin-bottom:20px;border:1px solid #76613f;background:linear-gradient(110deg,#142a43,#10243a)}
+.rule-download strong{font-size:18px;color:#f1d59c}.rule-download p{margin:7px 0 0;color:#b9c7d7;font-size:13px}
+.rule-download-button{display:inline-flex;align-items:center;justify-content:center;text-align:center;padding:13px 18px;border-radius:9px;background:#d4b474;color:#07111e;font-weight:800;text-decoration:none;white-space:normal}
+.rule-download-button:hover{background:#f1d59c}
+@media(max-width:700px){.progress-canvas svg{height:390px}.progress-controls{width:100%}.rule-download-button{width:100%}}
