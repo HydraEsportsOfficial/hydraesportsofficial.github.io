@@ -117,3 +117,14 @@
 @media(max-width:600px){.roster-leagues{grid-template-columns:1fr}}
 
 .team-logo{width:132px;height:84px;padding:10px;border:0;background:#102638;display:flex;align-items:center;justify-content:center}.team-logo img{max-width:100%;max-height:100%;object-fit:contain}.team-logo span{font-weight:900;color:#d4b474}
+
+/* 4.0.1: keep team emblems visible without changing their original colors */
+.team-logo{background:#f3f5f8!important;border:1px solid #c5cdd8!important;box-shadow:inset 0 0 0 1px #ffffff,0 4px 16px #0003;border-radius:12px!important}
+.team-logo img{filter:none!important;max-width:96%;max-height:90%;object-fit:contain}
+.team-logo span{color:#142a43!important}
+
+/* Hydra 4.0.2 — official identity */
+.brand-official-logo{height:58px;width:48px;object-fit:contain;display:block;flex-shrink:0;filter:drop-shadow(0 2px 5px rgba(0,0,0,.4))}
+.hero-side{display:flex;align-items:center;justify-content:center;overflow:hidden}
+.hero-official-logo{height:100%;max-height:235px;width:100%;max-width:240px;object-fit:contain;filter:drop-shadow(0 8px 22px rgba(0,0,0,.55))}
+@media(max-width:800px){.brand-official-logo{height:46px;width:38px}.hero-official-logo{max-height:140px;max-width:155px}}
