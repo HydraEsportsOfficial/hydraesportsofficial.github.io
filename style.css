@@ -152,3 +152,26 @@
 .profile-heading .team-mini-logo{width:90px;min-width:90px;height:70px}
 @media(max-width:1100px){.last-race-content{grid-template-columns:1fr}.last-race-photo{min-height:185px}.last-race-info{padding:14px 0 0}}
 @media(max-width:760px){.last-race-content{padding:12px}.last-race-photo{min-height:170px}.team-roster-card .team-logo{height:100px}.hydra-standings .team-mini-logo{width:43px;min-width:43px}}
+
+
+/* Hydra 4.0.5 – home standings logos, hero livery, refined paddock */
+.hero{isolation:isolate}
+.hero-art{right:0;top:0;width:64%;height:100%;opacity:1;filter:none;z-index:0}
+.hero-art img{width:100%;height:100%;object-fit:cover;object-position:center 55%;display:block}
+.hero-art:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#07111e 0%,rgba(7,17,30,.65) 23%,rgba(7,17,30,.04) 75%)}
+.hero-side{left:24px;right:auto;top:50%;transform:translateY(-50%);width:150px;height:195px;z-index:2}
+.hero-official-logo{width:100%;height:100%;max-width:150px;max-height:195px}
+.hero-copy{margin-left:195px;max-width:580px}
+.home-standing-person{display:flex;align-items:center;gap:9px;min-width:0}
+.home-standing-person>span:last-child{min-width:0;display:block}
+.home-standing-person strong{display:block;overflow-wrap:anywhere}
+.home-standing-person small{display:block;color:var(--muted);font-size:11px;margin-top:3px}
+.home-standing-person .team-mini-logo{width:43px;min-width:43px;height:35px;padding:5px;flex-shrink:0}
+.team-roster-card .team-logo{width:min(78%,235px)!important;height:104px!important;margin:0 auto 20px!important;padding:5px 9px!important;box-sizing:border-box}
+.team-roster-card .team-logo img{max-width:100%!important;max-height:100%!important;width:100%;height:100%;object-fit:contain}
+.team-roster-card h3{font-size:clamp(23px,2vw,29px)}
+.team-roster-card .roster-leagues{font-size:16px}
+.team-roster-card .roster-leagues span{font-size:15px;line-height:1.55}
+.team-roster-card .team-tp{font-size:14px}
+@media(max-width:900px){.hero-side{width:115px;height:145px;left:15px}.hero-copy{margin-left:145px}.hero-art{width:75%}}
+@media(max-width:650px){.hero-side{display:flex;left:10px;top:28px;transform:none;width:72px;height:82px}.hero-copy{margin:108px 18px 0}.hero h1{font-size:48px}.hero-art{right:0;top:0;width:100%;height:100%;opacity:.65}.hero-art:after{background:linear-gradient(90deg,rgba(7,17,30,.72),rgba(7,17,30,.36)),linear-gradient(0deg,#07111e,transparent 75%)}.team-roster-card .team-logo{width:min(76%,215px)!important;height:105px!important}}
