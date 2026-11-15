@@ -83,11 +83,9 @@ function renderCalendar(races,results){
  const panels=['A','B'].map(l=>{
   const r=rr.find(x=>x.league===l);
   if(!r)return `<article class="calendar-result-panel"><h4>LEGA ${l}</h4><p class="muted">Gara non ancora inserita.</p></article>`;
-  const rows=results.filter(x=>String(x.race_id)===String(r.id)).map(x=>{
-    const d=driversById.get(String(x.driver_id));
-    const h=(window.HYDRA_STORICO_GARE||[]).find(y=>y.round===Number(r.round_number)&&y.league===l&&y.driver.toLowerCase()===String(d?.gamertag||'').toLowerCase());
-    return {...x,finishing_position:x.finishing_position??h?.position,qualifying_position:x.qualifying_position??h?.qualifying,fastest_lap:x.fastest_lap??h?.fastest,penalty_seconds:x.penalty_seconds??h?.seconds,penalty_coin:x.penalty_coin??h?.coin,status:h?.retired?'dnf':x.status};
-   }).sort((a,b)=>(a.finishing_position??999)-(b.finishing_position??999));
+  const rows=results.filter(x=>String(x.race_id)===String(r.id))
+   .sort((a,b)=>(a.finishing_position??999)-(b.finishing_position??999)
+    ||String(driversById.get(String(a.driver_id))?.gamertag||'').localeCompare(String(driversById.get(String(b.driver_id))?.gamertag||''),'it'));
   const body=r.status==='official'&&rows.length
    ?`<div class="calendar-results-scroll"><table><thead><tr><th>POS</th><th>PILOTA</th><th>SCUDERIA</th><th>Q</th><th>GV</th><th>PEN. SEC</th><th>PEN. COIN</th><th>PT</th></tr></thead><tbody>${rows.map(x=>{
     const d=driversById.get(String(x.driver_id)),t=teamsById.get(String(x.team_id??d?.team_id));
