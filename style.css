@@ -36,3 +36,47 @@
 #standings .switch{flex-wrap:wrap}
 #standings .switch button{flex:1 1 140px}
 #standings-general-content .combined-head{margin-top:20px}
+
+/* Hydra 2.6 — calendario a griglia */
+.calendar-intro{max-width:750px;color:var(--muted);line-height:1.65;margin:12px 0 0}
+.calendar-toolbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin:22px 0 18px;flex-wrap:wrap}
+.calendar-kicker{font:800 13px 'Barlow Condensed',sans-serif;letter-spacing:2px;color:#27f4d2}
+.calendar-summary{font-size:12px;letter-spacing:1.4px;color:#9db2be;font-weight:700}
+.calendar-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.calendar-card{min-width:0;display:block;text-align:left;padding:0;background:linear-gradient(150deg,#142a35,#0a1925 75%);border:1px solid #2c4c55;border-radius:15px;overflow:hidden;color:#f4f6fa;cursor:pointer;transition:transform .18s,border-color .18s,box-shadow .18s}
+.calendar-card:hover,.calendar-card:focus-visible{transform:translateY(-3px);border-color:#27f4d2;box-shadow:0 8px 30px #0005;outline:none}
+.calendar-card-next{border-color:#27f4d2;box-shadow:0 0 0 1px #27f4d255}
+.calendar-card-active{border-color:#27f4d2}
+.calendar-card-top{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:17px 18px 8px;font:800 17px 'Barlow Condensed',sans-serif;letter-spacing:1.4px;color:#27f4d2}
+.calendar-card-badge{font:800 10px Inter,sans-serif;letter-spacing:.8px;padding:7px 9px;border-radius:30px;color:#b8c8ce;background:#233640}
+.calendar-card-next .calendar-card-badge{color:#05201c;background:#27f4d2}
+.calendar-card-art{position:relative;height:116px;overflow:hidden;background:radial-gradient(ellipse at 65% 40%,#1c4a4c,#0d2530 65%,#081723)}
+.calendar-art-circle{position:absolute;width:170px;height:170px;border:1px solid #27f4d233;border-radius:50%;left:35%;top:-35px;box-shadow:0 0 0 27px #27f4d208,0 0 0 55px #27f4d207}
+.calendar-art-track{position:absolute;left:18px;top:-24px;font:900 150px 'Barlow Condensed',sans-serif;transform:rotate(-17deg);color:#27f4d23a}
+.calendar-art-number{position:absolute;right:18px;bottom:-27px;font:900 125px 'Barlow Condensed',sans-serif;letter-spacing:-7px;color:#ffffff16}
+.calendar-card-main{padding:16px 18px 12px}
+.calendar-card-main h3{font:800 28px/1.06 'Barlow Condensed',sans-serif;letter-spacing:.3px;text-transform:uppercase;margin:0;overflow-wrap:anywhere}
+.calendar-card-main p{font-size:10px;letter-spacing:2px;color:#8eacb1;margin:8px 0 0}
+.calendar-leagues{padding:0 18px 13px}
+.calendar-league{display:grid;grid-template-columns:68px 1fr;align-items:center;gap:5px 8px;padding:12px 0;border-top:1px solid #2a444c}
+.calendar-league-name{font:800 14px 'Barlow Condensed',sans-serif;color:#fff}
+.calendar-league-date{font-size:12px;color:#d8e2e5;text-align:right}
+.calendar-league-status{grid-column:2;font-size:10px;letter-spacing:1px;text-align:right;color:#27f4d2}
+.calendar-league-status.is-done{color:#9db4bb}
+.calendar-card-foot{border-top:1px solid #2a444c;padding:13px 18px;display:flex;justify-content:space-between;color:#27f4d2;font:800 12px 'Barlow Condensed',sans-serif;letter-spacing:1.5px}
+.calendar-detail{margin-top:24px;background:#0e202b;border:1px solid #2e535a;border-radius:15px;padding:22px}
+.calendar-detail[hidden]{display:none}
+.calendar-detail-title{display:flex;align-items:start;justify-content:space-between;gap:15px;margin-bottom:18px}
+.calendar-detail-title h3{font:800 33px 'Barlow Condensed',sans-serif;text-transform:uppercase;margin:5px 0 0}
+#calendar-close{border:1px solid #42636a;background:#172e38;color:white;border-radius:8px;padding:10px 14px;cursor:pointer}
+.calendar-results-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.calendar-result-panel{min-width:0;border:1px solid #2c4c55;background:#102734;border-radius:11px;padding:15px}
+.calendar-result-head{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.calendar-result-head h4{font:800 24px 'Barlow Condensed',sans-serif;color:#27f4d2;margin:0}
+.calendar-result-head span,.calendar-result-state{font-size:12px;color:#b7c9cf}
+.calendar-results-scroll{overflow-x:auto}
+.calendar-results-scroll table{width:100%;font-size:12px}
+.calendar-results-scroll th,.calendar-results-scroll td{padding:8px 6px}
+.calendar-no-results{font-size:13px;color:#a9bdc4;line-height:1.6}
+@media(max-width:1000px){.calendar-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){.calendar-grid,.calendar-results-grid{grid-template-columns:1fr}.calendar-card-art{height:100px}.calendar-detail{padding:14px}}

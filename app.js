@@ -28,11 +28,74 @@ $('#constructors-league-table').innerHTML=grid(['#','Scuderia','Punti'],construc
 const constructorsCombined=sortTeams(teams.map(t=>({name:t.name,points:combinedPoints.get(String(t.id))||0})));
 $('#constructors-table').innerHTML=grid(['#','Scuderia','Punti'],constructorsCombined.map((t,i)=>[i+1,t.name,t.points]));
 $('#team-cards').innerHTML=teams.length?teams.map(t=>`<article><div class="eyebrow">SCUDERIA</div><h3>${esc(t.name)}</h3><p>${drivers.filter(d=>d.team_id===t.id).map(d=>`${esc(d.gamertag)} · Lega ${esc(d.league)}`).join('<br>')||'Piloti non assegnati'}</p></article>`).join(''):'<p class="empty">Nessuna scuderia ancora inserita.</p>';
-$('#calendar-table').innerHTML=grid(['Round','Circuito','Lega','Data','Stato'],[...races].sort((a,b)=>a.round_number-b.round_number||a.league.localeCompare(b.league)).map(r=>[r.round_number,r.circuit,r.league,r.race_date||'Da definire',r.status]));
+renderCalendar(races,results);
 const sel=$('#race-select'),prev=sel.value;sel.innerHTML='<option value="">Seleziona una gara</option>'+races.map(r=>`<option value="${r.id}">${esc(`R${r.round_number} · ${r.circuit} · Lega ${r.league}`)}</option>`).join('');sel.value=races.some(r=>String(r.id)===prev)?prev:'';renderResults();
 const pu=data.hydra_team_power_units||[];
 $('#resource-table').innerHTML=grid(['Scuderia','COIN','PU 1','PU 2','PU 3','PU 4','Totale PU residue'],teams.map(t=>{const slots=pu.filter(x=>x.team_id===t.id);const v=n=>{const x=slots.find(x=>x.slot===n);return x?`${x.remaining}/${x.total}`:'—'};return[t.name,t.coin_balance??'—',v(1),v(2),v(3),v(4),slots.length===4?slots.reduce((a,x)=>a+x.remaining,0):'—']}));
 $('#pu-drivers-table').innerHTML=grid(['Scuderia','Pilota','Lega'],teams.flatMap(t=>drivers.filter(d=>d.team_id===t.id).map(d=>[t.name,d.gamertag,d.league])));}
+
+let calendarSelectedRound=null;
+function calendarDate(raw){
+ if(!raw)return 'Data da definire';
+ const dt=new Date(String(raw).slice(0,10)+'T12:00:00');
+ return Number.isNaN(dt.getTime())?'Data da definire':dt.toLocaleDateString('it-IT',{day:'2-digit',month:'short',year:'numeric'});
+}
+function calendarStatus(r){
+ return r?.status==='official'?'CONCLUSA':r?.status==='provisional'?'PROVVISORIA':r?.status==='scheduled'?'IN PROGRAMMA':'DA DEFINIRE';
+}
+function renderCalendar(races,results){
+ const byRound=new Map();
+ for(const r of races){
+  const n=Number(r.round_number);
+  if(!byRound.has(n))byRound.set(n,[]);
+  byRound.get(n).push(r);
+ }
+ const rounds=[...byRound.keys()].sort((a,b)=>a-b);
+ const next=rounds.find(n=>byRound.get(n).some(r=>r.status!=='official'))??null;
+ const completed=rounds.filter(n=>byRound.get(n).every(r=>r.status==='official')).length;
+ $('#calendar-summary').textContent=`${rounds.length} ROUND · ${completed} CONCLUSI`;
+ const circuitFor=rr=>rr.find(r=>r.circuit)?.circuit||'Circuito da definire';
+ $('#calendar-table').innerHTML=rounds.map(n=>{
+  const rr=byRound.get(n),done=rr.every(r=>r.status==='official'),isNext=n===next;
+  const badge=done?'CONCLUSO':isNext?'PROSSIMO ROUND':'IN PROGRAMMA';
+  const leagues=['A','B'].map(l=>{
+   const r=rr.find(x=>x.league===l);
+   return `<div class="calendar-league"><span class="calendar-league-name">LEGA ${l}</span><span class="calendar-league-date">${r?esc(calendarDate(r.race_date)):'Non programmata'}</span><span class="calendar-league-status ${r?.status==='official'?'is-done':''}">${esc(calendarStatus(r))}</span></div>`;
+  }).join('');
+  return `<button type="button" class="calendar-card ${isNext?'calendar-card-next':''} ${done?'calendar-card-done':''} ${calendarSelectedRound===n?'calendar-card-active':''}" data-calendar-round="${n}" aria-expanded="${calendarSelectedRound===n?'true':'false'}">
+    <div class="calendar-card-top"><span>ROUND ${String(n).padStart(2,'0')}</span><span class="calendar-card-badge">${badge}</span></div>
+    <div class="calendar-card-art" aria-hidden="true"><span class="calendar-art-circle"></span><span class="calendar-art-track">⌁</span><span class="calendar-art-number">${String(n).padStart(2,'0')}</span></div>
+    <div class="calendar-card-main"><h3>${esc(circuitFor(rr))}</h3><p>HYDRA GRAND PRIX</p></div>
+    <div class="calendar-leagues">${leagues}</div><div class="calendar-card-foot">DETTAGLI E RISULTATI <span>↗</span></div></button>`;
+ }).join('')||'<p class="empty">Nessun Gran Premio ancora inserito.</p>';
+ document.querySelectorAll('[data-calendar-round]').forEach(b=>b.onclick=()=>{
+  const n=Number(b.dataset.calendarRound);
+  calendarSelectedRound=calendarSelectedRound===n?null:n;
+  renderCalendar(races,results);
+  if(calendarSelectedRound!==null)$('#calendar-detail').scrollIntoView({behavior:'smooth',block:'nearest'});
+ });
+ const detail=$('#calendar-detail');
+ if(calendarSelectedRound===null||!byRound.has(calendarSelectedRound)){detail.hidden=true;detail.innerHTML='';return;}
+ detail.hidden=false;
+ const rr=byRound.get(calendarSelectedRound);
+ const driversById=new Map((data.hydra_drivers||[]).map(d=>[String(d.id),d]));
+ const teamsById=new Map((data.hydra_teams||[]).map(t=>[String(t.id),t]));
+ const panels=['A','B'].map(l=>{
+  const r=rr.find(x=>x.league===l);
+  if(!r)return `<article class="calendar-result-panel"><h4>LEGA ${l}</h4><p class="muted">Gara non ancora inserita.</p></article>`;
+  const rows=results.filter(x=>String(x.race_id)===String(r.id)).sort((a,b)=>(a.finishing_position??999)-(b.finishing_position??999));
+  const body=r.status==='official'&&rows.length
+   ?`<div class="calendar-results-scroll"><table><thead><tr><th>POS</th><th>PILOTA</th><th>SCUDERIA</th><th>PT</th></tr></thead><tbody>${rows.map(x=>{
+    const d=driversById.get(String(x.driver_id)),t=teamsById.get(String(x.team_id??d?.team_id));
+    return `<tr><td>${esc(x.finishing_position??'—')}</td><td>${esc(d?.gamertag||'—')}</td><td>${esc(t?.name||'—')}</td><td>${esc(x.points??0)}</td></tr>`;
+   }).join('')}</tbody></table></div>`
+   :`<p class="calendar-no-results">${r.status==='official'?'Risultati non disponibili.':'Risultati disponibili dopo l’ufficializzazione della gara.'}</p>`;
+  return `<article class="calendar-result-panel"><div class="calendar-result-head"><h4>LEGA ${l}</h4><span>${esc(calendarDate(r.race_date))}</span></div><p class="calendar-result-state">${esc(calendarStatus(r))}</p>${body}</article>`;
+ }).join('');
+ detail.innerHTML=`<div class="calendar-detail-title"><div><span class="calendar-kicker">RACE REPORT · ROUND ${String(calendarSelectedRound).padStart(2,'0')}</span><h3>${esc(circuitFor(rr))}</h3></div><button type="button" id="calendar-close" aria-label="Chiudi dettagli">✕</button></div><div class="calendar-results-grid">${panels}</div>`;
+ $('#calendar-close').onclick=()=>{calendarSelectedRound=null;renderCalendar(races,results)};
+}
+
 function renderResults(){const raceId=Number($('#race-select').value);const rows=(data.hydra_results||[]).filter(r=>r.race_id===raceId).sort((a,b)=>(a.finishing_position??999)-(b.finishing_position??999));$('#results-table').innerHTML=grid(['Pos.','Pilota','Esito','Punti','Note'],rows.map(r=>[r.finishing_position??'—',nameOf('hydra_drivers',r.driver_id),r.status,r.points,r.notes||'—']))}
 function page(name){document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===name));document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===name));window.scrollTo(0,0)}document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>page(b.dataset.page));document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>page(b.dataset.go));document.querySelectorAll('[data-league]').forEach(b=>b.onclick=()=>{league=b.dataset.league;document.querySelectorAll('[data-league]').forEach(x=>x.classList.toggle('selected',x===b));render()});$('#race-select').onchange=renderResults;
 async function login(e){e.preventDefault();const user=$('#login-name').value.trim();if(user.toLowerCase()!==ADMIN_LOGIN.toLowerCase()){alert('Credenziali non valide');return}const password=$('#login-password').value;try{const r=await request('/auth/v1/token?grant_type=password',{method:'POST',body:JSON.stringify({email:ADMIN_EMAIL,password})});token=r.access_token;sessionStorage.setItem('hydra_session',JSON.stringify({access_token:r.access_token,refresh_token:r.refresh_token}));$('#login-password').value='';await checkAdmin()}catch(e){token=null;alert('Accesso non riuscito: '+e.message)}}
