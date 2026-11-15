@@ -31,3 +31,8 @@
 .combined-table{max-width:100%}.combined-table table:not(.home-table){min-width:0}
 @media(max-width:900px){.standings-duo{grid-template-columns:1fr}}
 @media(max-width:500px){.standings-card-title{font-size:23px}.standings-duo table:not(.home-table) th,.standings-duo table:not(.home-table) td{padding:10px 6px;font-size:12px}}
+
+/* Campionato: tre schede A, B e Generale */
+#standings .switch{flex-wrap:wrap}
+#standings .switch button{flex:1 1 140px}
+#standings-general-content .combined-head{margin-top:20px}
