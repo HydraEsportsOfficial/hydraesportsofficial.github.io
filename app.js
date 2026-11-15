@@ -39,6 +39,7 @@ renderCalendar(races,results);
 const sel=$('#race-select'),prev=sel.value;sel.innerHTML='<option value="">Seleziona una gara</option>'+races.map(r=>`<option value="${r.id}">${esc(`R${r.round_number} · ${r.circuit} · Lega ${r.league}`)}</option>`).join('');sel.value=races.some(r=>String(r.id)===prev)?prev:'';renderResults();
 const pu=data.hydra_team_power_units||[];
 $('#resource-table').innerHTML=grid(['Scuderia','COIN','PU 1','PU 2','PU 3','PU 4','Totale PU residue'],teams.map(t=>{const slots=pu.filter(x=>x.team_id===t.id);const v=n=>{const x=slots.find(x=>x.slot===n);return x?`${x.remaining}/${x.total}`:'—'};return[t.name,t.coin_balance??'—',v(1),v(2),v(3),v(4),slots.length===4?slots.reduce((a,x)=>a+x.remaining,0):'—']}));
+$('#resource-mobile-cards').innerHTML=teams.map(t=>{const slots=pu.filter(x=>x.team_id===t.id);const slot=n=>{const x=slots.find(x=>x.slot===n);return x?`${x.remaining}/${x.total}`:'—'};const total=slots.length===4?slots.reduce((sum,x)=>sum+Number(x.remaining||0),0):'—';return `<article class="resource-mobile-card" style="--team-accent:${hydraTeamColor(t.name)}"><h3>${esc(t.name)}</h3><div class="resource-mobile-metrics"><div><small>SALDO COIN</small><strong>${esc(t.coin_balance??'—')}</strong></div><div><small>PU DISPONIBILI</small><strong>${esc(total)}</strong></div></div><div class="resource-mobile-slots">${[1,2,3,4].map(n=>`<div><span>PU ${n}</span><b>${esc(slot(n))}</b></div>`).join('')}</div></article>`}).join('');
 }
 
 let calendarSelectedRound=null;
