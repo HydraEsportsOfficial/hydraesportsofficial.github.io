@@ -1,3 +1,4 @@
+function hydraTeamLogo(name){const logos={"Alpine": "alpine", "Aston Martin": "astonmartin", "Audi": "audi", "Cadillac": "cadillac", "Ferrari": "ferrari", "Haas": "haas", "McLaren": "mclaren", "Mercedes": "mercedes", "Racing Bulls": "racingbulls", "Red Bull": "redbullracing", "Williams": "williams"};const key=Object.keys(logos).find(k=>name.includes(k));if(!key)return '';const slug=logos[key];return `https://media.formula1.com/image/upload/common/f1/2026/${slug}/2026${slug}logo.svg`}
 'use strict';
 // Publishable API key only. Never place a service_role/secret key in browser code.
 const URL_BASE='https://wgjdhdssiveqedluktwi.supabase.co';
@@ -11,7 +12,7 @@ function showStandingsTab(){const general=league==='GENERAL';$('#standings-leagu
 const $=s=>document.querySelector(s);const esc=v=>String(v??'—').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const nameOf=(table,id)=>{let r=(data[table]||[]).find(x=>String(x.id)===String(id));return r?(r.name||r.gamertag||`${r.circuit} · ${r.league} · R${r.round_number}`):'—'};
 async function request(path,opts={}){const headers={'apikey':PUBLIC_KEY,'Content-Type':'application/json',...(token?{'Authorization':`Bearer ${token}`}:{'Authorization':`Bearer ${PUBLIC_KEY}`}),...(opts.headers||{})};const response=await fetch(URL_BASE+path,{...opts,headers});const body=await response.text();let result;try{result=body?JSON.parse(body):null}catch{result=body}if(!response.ok)throw Error(result?.message||result?.error_description||`Errore ${response.status}`);return result}
-async function load(){try{await Promise.all(tables.map(async t=>data[t]=await request(`/rest/v1/${t}?select=*&order=${t==='hydra_team_power_units'?'team_id.asc,slot.asc':t==='hydra_attendance'?'race_id.asc,driver_id.asc':t==='hydra_attendance_settings'?'race_id.asc':'id.asc'}`)));render();renderAttendance();if(token){renderAdmin();renderAttendanceAdmin()}}catch(e){console.error(e);if($('#stat-drivers')) $('#stat-drivers').textContent='!';$('#standings-table').innerHTML=`<p class="empty">Impossibile caricare i dati: ${esc(e.message)}</p>`}}
+async function load(){try{await Promise.all(tables.map(async t=>data[t]=await request(`/rest/v1/${t}?select=*&order=${t==='hydra_team_power_units'?'team_id.asc,slot.asc':t==='hydra_attendance'?'race_id.asc,driver_id.asc':t==='hydra_attendance_settings'?'race_id.asc':'id.asc'}`)));render();renderAttendance();if(token){renderAdmin();renderAttendanceAdmin();renderRosterAdmin()}}catch(e){console.error(e);if($('#stat-drivers')) $('#stat-drivers').textContent='!';$('#standings-table').innerHTML=`<p class="empty">Impossibile caricare i dati: ${esc(e.message)}</p>`}}
 function grid(head,rows){if(!rows.length)return '<p class="empty">Nessun dato ancora pubblicato.</p>';return `<table><thead><tr>${head.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.map(row=>`<tr>${row.map(v=>`<td>${esc(v)}</td>`).join('')}</tr>`).join('')}</tbody></table>`}
 function render(){showStandingsTab();const drivers=data.hydra_drivers||[],teams=data.hydra_teams||[],races=data.hydra_races||[],results=data.hydra_results||[];if($('#stat-drivers')) $('#stat-drivers').textContent=drivers.length;if($('#stat-teams')) $('#stat-teams').textContent=teams.length;if($('#stat-races')) $('#stat-races').textContent=races.length;
 const official=results.filter(r=>races.some(g=>g.id===r.race_id&&g.status==='official'));
@@ -27,12 +28,12 @@ const constructorsLeague=sortTeams(teams.map(t=>({name:t.name,points:leaguePoint
 $('#constructors-league-table').innerHTML=grid(['#','Scuderia','Punti'],constructorsLeague.map((t,i)=>[i+1,t.name,t.points]));
 const constructorsCombined=sortTeams(teams.map(t=>({name:t.name,points:combinedPoints.get(String(t.id))||0})));
 $('#constructors-table').innerHTML=grid(['#','Scuderia','Punti'],constructorsCombined.map((t,i)=>[i+1,t.name,t.points]));
-$('#team-cards').innerHTML=teams.length?teams.map(t=>`<article><div class="eyebrow">SCUDERIA</div><h3>${esc(t.name)}</h3><p>${drivers.filter(d=>d.team_id===t.id).map(d=>`${esc(d.gamertag)} · Lega ${esc(d.league)}`).join('<br>')||'Piloti non assegnati'}</p></article>`).join(''):'<p class="empty">Nessuna scuderia ancora inserita.</p>';
+$('#team-cards').innerHTML=teams.length?teams.map(t=>{const td=drivers.filter(d=>d.team_id===t.id),tp=drivers.find(d=>d.id===t.team_principal_driver_id);return `<article class="team-roster-card"><div class="team-logo"><img src="${hydraTeamLogo(t.name)}" alt="Logo ${esc(t.name)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><span style="display:none">${esc(t.name.split(' ').filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase())}</span></div><div class="eyebrow">SCUDERIA · ${td.length} TITOLARI</div><h3>${esc(t.name)}</h3><p class="team-tp">TEAM PRINCIPAL: <strong>${esc(tp?.gamertag||'Da assegnare')}</strong></p><div class="roster-leagues">${['A','B'].map(l=>`<div><strong>LEGA ${l}</strong>${td.filter(d=>d.league===l).map(d=>`<span>${esc(d.gamertag)}</span>`).join('')||'<span>Posto libero</span>'}</div>`).join('')}</div>${['A','B'].some(l=>td.filter(d=>d.league===l).length>2)?'<p class="roster-warning">⚠ Roster da verificare: oltre due titolari per lega</p>':''}</article>`}).join(''):'<p class="empty">Nessuna scuderia ancora inserita.</p>';$('#wild-drivers').innerHTML=drivers.filter(d=>d.team_id==null).map(d=>`<span class="wild-chip">${esc(d.gamertag)} · Lega ${esc(d.league)}</span>`).join('')||'<p class="muted">Nessun pilota WILD.</p>';
 renderCalendar(races,results);
 const sel=$('#race-select'),prev=sel.value;sel.innerHTML='<option value="">Seleziona una gara</option>'+races.map(r=>`<option value="${r.id}">${esc(`R${r.round_number} · ${r.circuit} · Lega ${r.league}`)}</option>`).join('');sel.value=races.some(r=>String(r.id)===prev)?prev:'';renderResults();
 const pu=data.hydra_team_power_units||[];
 $('#resource-table').innerHTML=grid(['Scuderia','COIN','PU 1','PU 2','PU 3','PU 4','Totale PU residue'],teams.map(t=>{const slots=pu.filter(x=>x.team_id===t.id);const v=n=>{const x=slots.find(x=>x.slot===n);return x?`${x.remaining}/${x.total}`:'—'};return[t.name,t.coin_balance??'—',v(1),v(2),v(3),v(4),slots.length===4?slots.reduce((a,x)=>a+x.remaining,0):'—']}));
-$('#pu-drivers-table').innerHTML=grid(['Scuderia','Pilota','Lega'],teams.flatMap(t=>drivers.filter(d=>d.team_id===t.id).map(d=>[t.name,d.gamertag,d.league])));}
+}
 
 let calendarSelectedRound=null;
 function calendarDate(raw){
@@ -56,13 +57,13 @@ function renderCalendar(races,results){
  const next=rounds.find(n=>byRound.get(n).some(r=>r.status!=='official'))??null;
  const completed=rounds.filter(n=>byRound.get(n).every(r=>r.status==='official')).length;
  $('#calendar-summary').textContent=`${rounds.length} ROUND · ${completed} CONCLUSI`;
- const circuitFor=rr=>rr.find(r=>r.circuit)?.circuit||'Circuito da definire';
+ const circuitFor=rr=>rr.some(r=>Number(r.round_number)===6)?'Mystery GP · Brasile / Canada':rr.find(r=>r.circuit)?.circuit||'Circuito da definire';
  $('#calendar-table').innerHTML=rounds.map(n=>{
   const rr=byRound.get(n),done=rr.every(r=>r.status==='official'),isNext=n===next;
   const badge=done?'CONCLUSO':isNext?'PROSSIMO ROUND':'IN PROGRAMMA';
   const leagues=['A','B'].map(l=>{
    const r=rr.find(x=>x.league===l);
-   return `<div class="calendar-league"><span class="calendar-league-name">LEGA ${l}</span><span class="calendar-league-date">${r?esc(calendarDate(r.race_date)):'Non programmata'}</span><span class="calendar-league-status ${r?.status==='official'?'is-done':''}">${esc(calendarStatus(r))}</span></div>`;
+   return `<div class="calendar-league"><span class="calendar-league-name">LEGA ${l}${n===6?(l==='A'?' · 🇨🇦 CANADA':' · 🇧🇷 BRASILE'):''}</span><span class="calendar-league-date">${r?esc(calendarDate(r.race_date)):'Non programmata'}</span><span class="calendar-league-status ${r?.status==='official'?'is-done':''}">${esc(calendarStatus(r))}</span></div>`;
   }).join('');
   return `<button type="button" class="calendar-card ${isNext?'calendar-card-next':''} ${done?'calendar-card-done':''} ${calendarSelectedRound===n?'calendar-card-active':''}" data-calendar-round="${n}" aria-expanded="${calendarSelectedRound===n?'true':'false'}">
     <div class="calendar-card-top"><span><span class="calendar-country-flag" aria-label="Bandiera del paese ospitante">${calendarFlags[n]||'🏁'}</span> ROUND ${String(n).padStart(2,'0')}</span><span class="calendar-card-badge">${badge}</span></div>
@@ -133,9 +134,9 @@ function bindCalendarAttendance(){
 }
 
 function renderResults(){const raceId=Number($('#race-select').value);const rows=(data.hydra_results||[]).filter(r=>r.race_id===raceId).sort((a,b)=>(a.finishing_position??999)-(b.finishing_position??999));$('#results-table').innerHTML=grid(['Pos.','Pilota','Esito','Punti','Note'],rows.map(r=>[r.finishing_position??'—',nameOf('hydra_drivers',r.driver_id),r.status,r.points,r.notes||'—']))}
-function page(name){document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===name));document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===name));window.scrollTo(0,0)}document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>page(b.dataset.page));document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>page(b.dataset.go));document.querySelectorAll('[data-league]').forEach(b=>b.onclick=()=>{league=b.dataset.league;document.querySelectorAll('[data-league]').forEach(x=>x.classList.toggle('selected',x===b));render()});$('#race-select').onchange=renderResults;
+function page(name){document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===name));document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===name));window.scrollTo(0,0)}$('#hydra-twitch').onclick=()=>window.open('https://www.twitch.tv/hydraesports_series','_blank','noopener,noreferrer');document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>page(b.dataset.page));document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>page(b.dataset.go));document.querySelectorAll('[data-league]').forEach(b=>b.onclick=()=>{league=b.dataset.league;document.querySelectorAll('[data-league]').forEach(x=>x.classList.toggle('selected',x===b));render()});$('#race-select').onchange=renderResults;
 async function login(e){e.preventDefault();const user=$('#login-name').value.trim();if(user.toLowerCase()!==ADMIN_LOGIN.toLowerCase()){alert('Credenziali non valide');return}const password=$('#login-password').value;try{const r=await request('/auth/v1/token?grant_type=password',{method:'POST',body:JSON.stringify({email:ADMIN_EMAIL,password})});token=r.access_token;sessionStorage.setItem('hydra_session',JSON.stringify({access_token:r.access_token,refresh_token:r.refresh_token}));$('#login-password').value='';await checkAdmin()}catch(e){token=null;alert('Accesso non riuscito: '+e.message)}}
-async function checkAdmin(){try{const u=await request('/auth/v1/user');const admins=await request('/rest/v1/hydra_admins?select=user_id');if(!admins.some(a=>a.user_id===u.id))throw Error('Account senza permessi amministrativi');$('#login-box').hidden=true;$('#admin-box').hidden=false;$('#admin-welcome').textContent='Accesso amministratore attivo · '+ADMIN_LOGIN;renderAdmin();renderAttendanceAdmin()}catch(e){token=null;sessionStorage.removeItem('hydra_session');$('#login-box').hidden=false;$('#admin-box').hidden=true;alert(e.message)}}
+async function checkAdmin(){try{const u=await request('/auth/v1/user');const admins=await request('/rest/v1/hydra_admins?select=user_id');if(!admins.some(a=>a.user_id===u.id))throw Error('Account senza permessi amministrativi');$('#login-box').hidden=true;$('#admin-box').hidden=false;$('#admin-welcome').textContent='Accesso amministratore attivo · '+ADMIN_LOGIN;renderAdmin();renderAttendanceAdmin();renderRosterAdmin()}catch(e){token=null;sessionStorage.removeItem('hydra_session');$('#login-box').hidden=false;$('#admin-box').hidden=true;alert(e.message)}}
 $('#login-form').onsubmit=login;$('#logout').onclick=async()=>{try{await request('/auth/v1/logout',{method:'POST'})}catch{}token=null;sessionStorage.removeItem('hydra_session');$('#admin-box').hidden=true;$('#login-box').hidden=false};
 function renderAdmin(){const table=$('#edit-entity').value,items=data[table]||[];if(table==='hydra_team_power_units'){renderPuAdmin();return}$('#edit-list').innerHTML='<div class="admin-list">'+items.map(r=>`<button type="button" data-edit="${r.id}">${esc(r.name||r.gamertag||r.circuit||r.reason||`Record ${r.id}`)}</button>`).join('')+'</div>';document.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>editRow(items.find(x=>x.id===Number(b.dataset.edit))));editRow(null)}
 function editRow(row){selected=row;const table=$('#edit-entity').value;$('#edit-title').textContent=row?`Modifica record #${row.id}`:'Nuovo record';$('#edit-fields').innerHTML=schema[table].map(([key,type,label])=>{let control='';if(type.startsWith('select:')){control=`<select name="${key}">${type.slice(7).split('|').map(x=>`<option value="${esc(x)}" ${row?.[key]===x?'selected':''}>${esc(x)}</option>`).join('')}</select>`}else if(type.startsWith('fk:')){const target=type.slice(3);control=`<select name="${key}"><option value="">— Nessuno —</option>${(data[target]||[]).map(x=>`<option value="${x.id}" ${row?.[key]===x.id?'selected':''}>${esc(x.name||x.gamertag||`${x.circuit} · ${x.league} · R${x.round_number}`)}</option>`).join('')}</select>`}else control=`<input name="${key}" type="${type}" value="${esc(row?.[key]??'')}" ${['name','gamertag','circuit','reason','round_number'].includes(key)?'required':''}>`;return `<label class="field">${esc(label)}${control}</label>`}).join('');if(table==='hydra_results'&&!row){const driverSelect=$('#edit-fields select[name=driver_id]'),teamSelect=$('#edit-fields select[name=team_id]');const suggest=()=>{const driver=(data.hydra_drivers||[]).find(d=>String(d.id)===driverSelect.value);if(driver?.team_id)teamSelect.value=String(driver.team_id)};driverSelect.addEventListener('change',suggest);suggest()}}
@@ -240,4 +241,40 @@ $('#admin-att-export').onclick=()=>{
  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),link=document.createElement('a');
  link.href=url;link.download=`Hydra_Presenze_${race.league}_${race.race_date||'gara'}.csv`;
  document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+};
+
+
+function renderRosterAdmin(){
+ if(!token)return;
+ const teams=data.hydra_teams||[],drivers=data.hydra_drivers||[],sel=$('#roster-team'),prev=sel.value;
+ sel.innerHTML=teams.map(t=>`<option value="${t.id}">${esc(t.name)}</option>`).join('');
+ if(teams.some(t=>String(t.id)===prev))sel.value=prev;
+ const team=teams.find(t=>String(t.id)===sel.value);if(!team)return;
+ const current=drivers.filter(d=>d.team_id===team.id);
+ $('#roster-current').innerHTML=['A','B'].map(l=>`<p><strong>Lega ${l}</strong>: ${current.filter(d=>d.league===l).map(d=>esc(d.gamertag)).join(', ')||'Posto libero'} (${current.filter(d=>d.league===l).length}/2)</p>`).join('');
+ const ds=$('#roster-driver'),old=ds.value;
+ ds.innerHTML='<option value="">Seleziona pilota</option>'+drivers.slice().sort((a,b)=>a.gamertag.localeCompare(b.gamertag)).map(d=>`<option value="${d.id}">${esc(d.gamertag)} · ${esc(d.league)} · ${esc(nameOf('hydra_teams',d.team_id)||'WILD')}</option>`).join('');
+ if(drivers.some(d=>String(d.id)===old))ds.value=old;
+ $('#roster-tp').innerHTML='<option value="">Da assegnare</option>'+current.map(d=>`<option value="${d.id}">${esc(d.gamertag)}</option>`).join('');
+ $('#roster-tp').value=team.team_principal_driver_id==null?'':String(team.team_principal_driver_id);
+}
+$('#roster-team').onchange=renderRosterAdmin;
+async function rosterPatch(path,payload){const rows=await request(path,{method:'PATCH',headers:{Prefer:'return=representation'},body:JSON.stringify(payload)});if(!Array.isArray(rows)||rows.length!==1)throw Error('Aggiornamento non confermato. Controlla i permessi.')}
+$('#roster-release').onclick=async()=>{
+ const d=(data.hydra_drivers||[]).find(d=>String(d.id)===$('#roster-driver').value),t=Number($('#roster-team').value);
+ if(!d||d.team_id!==t)return $('#roster-message').textContent='Seleziona un titolare di questa scuderia.';
+ if(!confirm(`Svincolare ${d.gamertag}? Diventerà WILD, senza cancellare lo storico.`))return;
+ try{await rosterPatch(`/rest/v1/hydra_drivers?id=eq.${d.id}`,{team_id:null});const team=(data.hydra_teams||[]).find(x=>x.id===t);if(team?.team_principal_driver_id===d.id)await rosterPatch(`/rest/v1/hydra_teams?id=eq.${t}`,{team_principal_driver_id:null});$('#roster-message').textContent='Pilota svincolato.';await load()}catch(e){$('#roster-message').textContent=e.message}
+};
+$('#roster-sign').onclick=async()=>{
+ const d=(data.hydra_drivers||[]).find(d=>String(d.id)===$('#roster-driver').value),t=Number($('#roster-team').value);
+ if(!d||!t)return $('#roster-message').textContent='Seleziona scuderia e pilota.';
+ if(d.team_id===t)return $('#roster-message').textContent='Pilota già titolare.';
+ if((data.hydra_drivers||[]).filter(x=>x.team_id===t&&x.league===d.league).length>=2)return $('#roster-message').textContent=`Lega ${d.league}: svincola prima un titolare.`;
+ if(!confirm(`Ingaggiare ${d.gamertag} nella scuderia selezionata?`))return;
+ try{await rosterPatch(`/rest/v1/hydra_drivers?id=eq.${d.id}`,{team_id:t});const old=(data.hydra_teams||[]).find(x=>x.id===d.team_id);if(old?.team_principal_driver_id===d.id)await rosterPatch(`/rest/v1/hydra_teams?id=eq.${old.id}`,{team_principal_driver_id:null});$('#roster-message').textContent='Ingaggio completato.';await load()}catch(e){$('#roster-message').textContent=e.message}
+};
+$('#roster-save-tp').onclick=async()=>{
+ const id=Number($('#roster-team').value),v=$('#roster-tp').value;
+ try{await rosterPatch(`/rest/v1/hydra_teams?id=eq.${id}`,{team_principal_driver_id:v?Number(v):null});$('#roster-message').textContent='Team Principal aggiornato.';await load()}catch(e){$('#roster-message').textContent=e.message}
 };
