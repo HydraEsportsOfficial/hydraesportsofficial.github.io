@@ -43,6 +43,7 @@ function calendarDate(raw){
 function calendarStatus(r){
  return r?.status==='official'?'CONCLUSA':r?.status==='provisional'?'PROVVISORIA':r?.status==='scheduled'?'IN PROGRAMMA':'DA DEFINIRE';
 }
+const calendarFlags={1:'🇦🇺',2:'🇸🇦',3:'🇬🇧',4:'🇧🇪',5:'🇳🇱',6:'❔',7:'🇪🇸',8:'🇸🇬',9:'🇺🇸',10:'🇺🇸',11:'🇮🇹',12:'🇦🇪'};
 function renderCalendar(races,results){
  const byRound=new Map();
  for(const r of races){
@@ -63,8 +64,8 @@ function renderCalendar(races,results){
    return `<div class="calendar-league"><span class="calendar-league-name">LEGA ${l}</span><span class="calendar-league-date">${r?esc(calendarDate(r.race_date)):'Non programmata'}</span><span class="calendar-league-status ${r?.status==='official'?'is-done':''}">${esc(calendarStatus(r))}</span></div>`;
   }).join('');
   return `<button type="button" class="calendar-card ${isNext?'calendar-card-next':''} ${done?'calendar-card-done':''} ${calendarSelectedRound===n?'calendar-card-active':''}" data-calendar-round="${n}" aria-expanded="${calendarSelectedRound===n?'true':'false'}">
-    <div class="calendar-card-top"><span>ROUND ${String(n).padStart(2,'0')}</span><span class="calendar-card-badge">${badge}</span></div>
-    <div class="calendar-card-art" aria-hidden="true"><span class="calendar-art-circle"></span><span class="calendar-art-track">⌁</span><span class="calendar-art-number">${String(n).padStart(2,'0')}</span></div>
+    <div class="calendar-card-top"><span><span class="calendar-country-flag" aria-label="Bandiera del paese ospitante">${calendarFlags[n]||'🏁'}</span> ROUND ${String(n).padStart(2,'0')}</span><span class="calendar-card-badge">${badge}</span></div>
+    <div class="calendar-card-art" aria-hidden="true"><img src="circuit-${String(n).padStart(2,'0')}.svg" alt="" loading="lazy" decoding="async"><span class="calendar-art-number">${String(n).padStart(2,'0')}</span></div>
     <div class="calendar-card-main"><h3>${esc(circuitFor(rr))}</h3><p>HYDRA GRAND PRIX</p></div>
     <div class="calendar-leagues">${leagues}</div><div class="calendar-card-foot">DETTAGLI E RISULTATI <span>↗</span></div></button>`;
  }).join('')||'<p class="empty">Nessun Gran Premio ancora inserito.</p>';
