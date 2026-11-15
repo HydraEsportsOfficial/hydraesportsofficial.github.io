@@ -180,3 +180,41 @@
 .team-mini-logo{background:#f5f5f3!important;border:1px solid rgba(255,255,255,.16);width:42px;height:34px;min-width:42px;display:inline-flex;align-items:center;justify-content:center;overflow:hidden;border-radius:7px}.team-mini-logo img{filter:none!important;object-fit:contain!important;width:90%!important;height:82%!important;max-width:90%!important;max-height:82%!important}.team-mini-logo b{color:#0b1b30}
 .rule-toolbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:16px;margin-bottom:22px}.rule-toolbar input{flex:1;min-width:180px;background:#07111e;color:#fff;border:1px solid #38516b;border-radius:8px;padding:12px}.rule-layout{display:grid;grid-template-columns:minmax(190px,250px) minmax(0,1fr);gap:22px;align-items:start}.rule-index{padding:18px;position:sticky;top:90px;max-height:75vh;overflow:auto}.rule-index a{display:block;color:#d6dfea;text-decoration:none;padding:9px 0;border-bottom:1px solid #263c55;font-size:13px}.rule-index a:hover{color:#d4b474}.rule-chapter{background:#0e2035;border:1px solid #38516b;border-radius:14px;padding:20px;margin-bottom:20px;scroll-margin-top:110px}.rule-chapter-head{display:flex;align-items:center;gap:16px;margin-bottom:14px}.rule-chapter-head>span{font-size:28px;color:#d4b474;font-weight:800}.rule-chapter-head h3{margin:0}.rule-article{border-top:1px solid #38516b;padding:12px 0;scroll-margin-top:110px}.rule-article summary{cursor:pointer;font-weight:700;line-height:1.5}.rule-article summary span{color:#d4b474;margin-right:10px}.rule-body{padding:12px 0 4px 20px;color:#d6dfea;line-height:1.65}.rule-body p{margin:0 0 12px}.rule-highlight{padding:7px 10px;border-left:2px solid #d4b474;background:rgba(212,180,116,.06)}
 .progress-panel{padding:20px;margin-top:24px}.progress-heading{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}.progress-heading select{margin-left:8px;background:#07111e;color:white;padding:8px;border:1px solid #38516b;border-radius:7px}.progress-filters{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}.progress-filters button{font-size:12px;border:1px solid #38516b;border-radius:20px;background:#07111e;color:#a6b4c6;padding:6px 10px;cursor:pointer}.progress-filters button.selected{color:#fff;border-color:var(--series-color,#d4b474);background:#142a43}.progress-canvas{overflow-x:auto}.progress-canvas svg{display:block;width:100%;min-width:600px;height:370px}.race-editor{display:grid;gap:12px;margin:15px 0}.race-edit-row{display:grid;grid-template-columns:35px minmax(140px,2fr) repeat(3,minmax(90px,1fr));gap:8px;background:#0b1b30;padding:12px;border-radius:10px;align-items:end}.race-edit-row label{font-size:11px;color:#a6b4c6;display:grid;gap:5px}.race-edit-row select,.race-edit-row input{width:100%;min-width:0;background:#07111e;color:#fff;border:1px solid #38516b;border-radius:6px;padding:8px}.race-edit-row .race-extra{grid-column:2/-1;display:flex;flex-wrap:wrap;gap:10px}.race-extra label{min-width:85px;flex:1}.race-edit-row .race-remove{background:transparent;color:#ff9d9d;border:0;cursor:pointer}.race-edit-row .race-check{display:flex;align-items:center;gap:5px}.race-edit-row .race-check input{width:auto}@media(max-width:760px){.rule-layout{grid-template-columns:1fr}.rule-index{position:static;max-height:220px}.race-edit-row{grid-template-columns:28px 1fr 1fr}.race-edit-row .race-extra{grid-column:1/-1}.progress-panel{padding:12px}}
+
+
+/* 4.0.6.1 — Restore the 4.0.5 ranking design and its team-color stripe.
+   Ferrari, Red Bull and Cadillac retain their internal logo details. */
+.team-mini-logo{
+  background:transparent!important;
+  border:0!important;
+  border-left:3px solid var(--team-accent,#d4b474)!important;
+  border-radius:0!important;
+  width:58px;
+  min-width:58px;
+  height:42px;
+  padding:7px 5px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+}
+.team-mini-logo img{
+  display:block;
+  width:100%!important;
+  height:100%!important;
+  max-width:100%!important;
+  max-height:100%!important;
+  object-fit:contain!important;
+  filter:brightness(0) invert(1)!important;
+}
+.team-mini-logo b{color:#fff!important}
+.team-mini-logo--detailed{
+  background:#f5f5f3!important;
+  border-left:3px solid var(--team-accent,#d4b474)!important;
+  border-radius:5px!important;
+  padding:5px 4px;
+}
+.team-mini-logo--detailed img{filter:none!important}
+.home-standing-person .team-mini-logo{width:43px;min-width:43px;height:35px;padding:5px}
+.last-top-row .team-mini-logo{width:39px;min-width:39px;height:30px;padding:4px}
+@media(max-width:760px){.hydra-standings .team-mini-logo{width:43px;min-width:43px}}
