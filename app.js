@@ -5,7 +5,7 @@ const PUBLIC_KEY='sb_publishable_SjpllvJDfzLQM7nD_0CnJQ_B31PCe_I';
 const ADMIN_LOGIN='Admin';
 const ADMIN_EMAIL='hydra1esports@gmail.com';
 const tables=['hydra_teams','hydra_drivers','hydra_races','hydra_results','hydra_resource_events','hydra_team_power_units','hydra_attendance','hydra_attendance_settings'];
-const schema={hydra_teams:[['name','text','Nome scuderia'],['coin_balance','number','Saldo COIN']],hydra_drivers:[['gamertag','text','Gamertag'],['league','select:A|B','Lega'],['team_id','fk:hydra_teams','Scuderia'],['power_units_used','number','PU utilizzate']],hydra_races:[['round_number','number','Round'],['circuit','text','Circuito'],['race_date','date','Data'],['league','select:A|B','Lega'],['status','select:scheduled|provisional|official','Stato']],hydra_results:[['race_id','fk:hydra_races','Gara'],['driver_id','fk:hydra_drivers','Pilota'],['team_id','fk:hydra_teams','Scuderia rappresentata nel GP'],['finishing_position','number','Posizione'],['points','number','Punti'],['status','select:classified|dnf|dns|dsq','Esito'],['notes','text','Note']],hydra_resource_events:[['team_id','fk:hydra_teams','Scuderia'],['driver_id','fk:hydra_drivers','Pilota'],['race_id','fk:hydra_races','Gara'],['coin_delta','number','Variazione COIN'],['pu_delta','number','Variazione PU'],['reason','text','Motivazione']]};
+const schema={hydra_teams:[['name','text','Nome scuderia'],['coin_balance','number','Saldo COIN']],hydra_drivers:[['gamertag','text','Gamertag'],['league','select:A|B','Lega'],['team_id','fk:hydra_teams','Scuderia'],['power_units_used','number','PU utilizzate']],hydra_races:[['round_number','number','Round'],['circuit','text','Circuito'],['race_date','date','Data'],['league','select:A|B','Lega'],['status','select:scheduled|provisional|official','Stato']],hydra_results:[['race_id','fk:hydra_races','Gara'],['driver_id','fk:hydra_drivers','Pilota'],['team_id','fk:hydra_teams','Scuderia rappresentata nel GP'],['finishing_position','number','Posizione'],['qualifying_position','number','Posizione qualifiche'],['fastest_lap','select:true|false','Giro veloce'],['penalty_seconds','number','Penalità secondi'],['penalty_coin','number','Penalità COIN'],['points','number','Punti'],['status','select:classified|dnf|dns|dsq','Esito'],['notes','text','Note']],hydra_resource_events:[['team_id','fk:hydra_teams','Scuderia'],['driver_id','fk:hydra_drivers','Pilota'],['race_id','fk:hydra_races','Gara'],['coin_delta','number','Variazione COIN'],['pu_delta','number','Variazione PU'],['reason','text','Motivazione']]};
 let data={},token=null,selected=null,league='A';
 function showStandingsTab(){const general=league==='GENERAL';$('#standings-league-content').hidden=general;$('#standings-general-content').hidden=!general;}
 const $=s=>document.querySelector(s);const esc=v=>String(v??'—').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -83,11 +83,15 @@ function renderCalendar(races,results){
  const panels=['A','B'].map(l=>{
   const r=rr.find(x=>x.league===l);
   if(!r)return `<article class="calendar-result-panel"><h4>LEGA ${l}</h4><p class="muted">Gara non ancora inserita.</p></article>`;
-  const rows=results.filter(x=>String(x.race_id)===String(r.id)).sort((a,b)=>(a.finishing_position??999)-(b.finishing_position??999));
+  const rows=results.filter(x=>String(x.race_id)===String(r.id)).map(x=>{
+    const d=driversById.get(String(x.driver_id));
+    const h=(window.HYDRA_STORICO_GARE||[]).find(y=>y.round===Number(r.round_number)&&y.league===l&&y.driver.toLowerCase()===String(d?.gamertag||'').toLowerCase());
+    return {...x,finishing_position:x.finishing_position??h?.position,qualifying_position:x.qualifying_position??h?.qualifying,fastest_lap:x.fastest_lap??h?.fastest,penalty_seconds:x.penalty_seconds??h?.seconds,penalty_coin:x.penalty_coin??h?.coin,status:h?.retired?'dnf':x.status};
+   }).sort((a,b)=>(a.finishing_position??999)-(b.finishing_position??999));
   const body=r.status==='official'&&rows.length
-   ?`<div class="calendar-results-scroll"><table><thead><tr><th>POS</th><th>PILOTA</th><th>SCUDERIA</th><th>PT</th></tr></thead><tbody>${rows.map(x=>{
+   ?`<div class="calendar-results-scroll"><table><thead><tr><th>POS</th><th>PILOTA</th><th>SCUDERIA</th><th>Q</th><th>GV</th><th>PEN. SEC</th><th>PEN. COIN</th><th>PT</th></tr></thead><tbody>${rows.map(x=>{
     const d=driversById.get(String(x.driver_id)),t=teamsById.get(String(x.team_id??d?.team_id));
-    return `<tr><td>${esc(x.finishing_position??'—')}</td><td>${esc(d?.gamertag||'—')}</td><td>${esc(t?.name||'—')}</td><td>${esc(x.points??0)}</td></tr>`;
+    return `<tr><td>${esc(x.finishing_position??'—')}${x.status==='dnf'?' <small>RIT</small>':''}</td><td>${esc(d?.gamertag||'—')}</td><td>${esc(t?.name||'—')}</td><td>${esc(x.qualifying_position??'—')}</td><td>${x.fastest_lap?'⚡':'—'}</td><td>${esc(x.penalty_seconds??'—')}</td><td>${esc(x.penalty_coin??'—')}</td><td>${esc(x.points??0)}</td></tr>`;
    }).join('')}</tbody></table></div>`
    :`<p class="calendar-no-results">${r.status==='official'?'Risultati non disponibili.':'Risultati disponibili dopo l’ufficializzazione della gara.'}</p>`;
   return `<article class="calendar-result-panel"><div class="calendar-result-head"><h4>LEGA ${l}</h4><span>${esc(calendarDate(r.race_date))}</span></div><p class="calendar-result-state">${esc(calendarStatus(r))}</p>${body}</article>`;
