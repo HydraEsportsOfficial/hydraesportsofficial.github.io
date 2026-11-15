@@ -68,7 +68,7 @@ function renderCalendar(races,results){
     <div class="calendar-card-top"><span><span class="calendar-country-flag" aria-label="Bandiera del paese ospitante">${calendarFlags[n]||'🏁'}</span> ROUND ${String(n).padStart(2,'0')}</span><span class="calendar-card-badge">${badge}</span></div>
     <div class="calendar-card-art" aria-hidden="true"><img src="${calendarPhotos[n]||'mystery.svg'}" alt="Vista del circuito" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='mystery.svg'"><span class="calendar-art-number">${String(n).padStart(2,'0')}</span></div>
     <div class="calendar-card-main"><h3>${esc(circuitFor(rr))}</h3><p>HYDRA GRAND PRIX</p></div>
-    <div class="calendar-leagues">${leagues}</div><div class="calendar-card-foot">DETTAGLI E RISULTATI <span>↗</span></div></button>`;
+    <div class="calendar-leagues">${leagues}</div><div class="calendar-card-foot">${done?'DETTAGLI E RISULTATI':'CONFERMA PRESENZA'} <span>↗</span></div></button>`;
  }).join('')||'<p class="empty">Nessun Gran Premio ancora inserito.</p>';
  document.querySelectorAll('[data-calendar-round]').forEach(b=>b.onclick=()=>{
   const n=Number(b.dataset.calendarRound);
@@ -88,6 +88,7 @@ function renderCalendar(races,results){
   const rows=results.filter(x=>String(x.race_id)===String(r.id))
    .sort((a,b)=>(a.finishing_position??999)-(b.finishing_position??999)
     ||String(driversById.get(String(a.driver_id))?.gamertag||'').localeCompare(String(driversById.get(String(b.driver_id))?.gamertag||''),'it'));
+  if(r.status==='scheduled')return calendarAttendancePanel(r);
   const body=r.status==='official'&&rows.length
    ?`<div class="calendar-results-scroll"><table><thead><tr><th>POS</th><th>PILOTA</th><th>SCUDERIA</th><th>Q</th><th>GV</th><th>PEN. SEC</th><th>PEN. COIN</th><th>PT</th></tr></thead><tbody>${rows.map(x=>{
     const d=driversById.get(String(x.driver_id)),t=teamsById.get(String(x.team_id??d?.team_id));
@@ -98,6 +99,37 @@ function renderCalendar(races,results){
  }).join('');
  detail.innerHTML=`<div class="calendar-detail-title"><div><span class="calendar-kicker">RACE REPORT · ROUND ${String(calendarSelectedRound).padStart(2,'0')}</span><h3>${esc(circuitFor(rr))}</h3></div><button type="button" id="calendar-close" aria-label="Chiudi dettagli">✕</button></div><div class="calendar-results-grid">${panels}</div>`;
  $('#calendar-close').onclick=()=>{calendarSelectedRound=null;renderCalendar(races,results)};
+ bindCalendarAttendance();
+}
+
+
+// Hydra 3.2: confirmations for each scheduled race, retaining nickname-based access.
+function calendarAttendancePanel(r){
+ const drivers=(data.hydra_drivers||[]).filter(d=>d.league===r.league).sort((a,b)=>a.gamertag.localeCompare(b.gamertag,'it'));
+ const rows=(data.hydra_attendance||[]).filter(x=>String(x.race_id)===String(r.id));
+ const statuses=new Map(rows.map(x=>[String(x.driver_id),x.response]));
+ const present=drivers.filter(d=>statuses.get(String(d.id))==='present').length;
+ const absent=drivers.filter(d=>statuses.get(String(d.id))==='absent').length;
+ const closed=deadlinePassed(r);
+ const opts=drivers.map(d=>`<option value="${d.id}">${esc(d.gamertag)} · ${esc(nameOf('hydra_teams',d.team_id)||'Senza scuderia')}</option>`).join('');
+ const list=drivers.map(d=>{const state=statuses.get(String(d.id))||'pending';return `<div><span>${esc(d.gamertag)}</span><span class="att-state ${state}">${state==='present'?'Presente':state==='absent'?'Assente':'In attesa'}</span></div>`}).join('');
+ return `<article class="calendar-result-panel calendar-att-panel" data-att-race="${r.id}"><div class="calendar-result-head"><h4>LEGA ${esc(r.league)} · PRESENZE</h4><span>${esc(calendarDate(r.race_date))}</span></div><p class="muted">${closed?'Conferme chiuse':'Conferme aperte'} · Scadenza: ${attDeadline(r)?esc(italyDate(attDeadline(r))):'ore 18:00 del giorno della gara (Italia)'}</p><label class="field">Il tuo nickname<select class="calendar-att-driver"><option value="">Seleziona il tuo nickname</option>${opts}</select></label><div class="attendance-actions"><button type="button" class="attendance-choice calendar-att-yes" ${closed?'disabled':''}>✓ Presente</button><button type="button" class="attendance-choice calendar-att-no" ${closed?'disabled':''}>✕ Assente</button></div><p class="muted calendar-att-current">Seleziona il nickname per vedere la tua risposta.</p><p class="calendar-att-message" role="status"></p><p class="muted small">Il nickname non verifica l'identità: non selezionare quello di altri piloti.</p><div class="attendance-counts"><div><b>${present}</b><small>Presenti</small></div><div><b>${absent}</b><small>Assenti</small></div><div><b>${drivers.length-present-absent}</b><small>In attesa</small></div></div><div class="attendance-list">${list}</div></article>`;
+}
+function bindCalendarAttendance(){
+ document.querySelectorAll('.calendar-att-panel').forEach(panel=>{
+  const race=(data.hydra_races||[]).find(r=>String(r.id)===panel.dataset.attRace);
+  const select=panel.querySelector('.calendar-att-driver');
+  const message=panel.querySelector('.calendar-att-message');
+  const update=()=>{const entry=(data.hydra_attendance||[]).find(x=>String(x.race_id)===String(race.id)&&String(x.driver_id)===select.value);panel.querySelector('.calendar-att-current').textContent=select.value?'Risposta attuale: '+(entry?.response==='present'?'Presente':entry?.response==='absent'?'Assente':'In attesa'):'Seleziona il nickname per confermare.'};
+  select.onchange=update;
+  for(const [cls,response] of [['.calendar-att-yes','present'],['.calendar-att-no','absent']])panel.querySelector(cls).onclick=async()=>{
+   const driverId=Number(select.value);if(!driverId){message.textContent='Seleziona prima il tuo nickname.';return}
+   if(deadlinePassed(race)){message.textContent='Termine per le conferme scaduto.';return}
+   message.textContent='Salvataggio in corso…';
+   try{await request('/rest/v1/hydra_attendance?on_conflict=race_id,driver_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({race_id:race.id,driver_id:driverId,response})});data.hydra_attendance=await request('/rest/v1/hydra_attendance?select=*');const round=calendarSelectedRound;renderCalendar(data.hydra_races||[],data.hydra_results||[]);const restored=document.querySelector(`.calendar-att-panel[data-att-race="${race.id}"]`);if(restored){restored.querySelector('.calendar-att-driver').value=String(driverId);restored.querySelector('.calendar-att-driver').dispatchEvent(new Event('change'));restored.querySelector('.calendar-att-message').textContent='Risposta salvata correttamente.'}}
+   catch(err){message.textContent='Salvataggio non riuscito: '+err.message}
+  };
+ });
 }
 
 function renderResults(){const raceId=Number($('#race-select').value);const rows=(data.hydra_results||[]).filter(r=>r.race_id===raceId).sort((a,b)=>(a.finishing_position??999)-(b.finishing_position??999));$('#results-table').innerHTML=grid(['Pos.','Pilota','Esito','Punti','Note'],rows.map(r=>[r.finishing_position??'—',nameOf('hydra_drivers',r.driver_id),r.status,r.points,r.notes||'—']))}

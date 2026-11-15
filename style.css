@@ -91,3 +91,11 @@
 
 .calendar-card-art img{object-fit:cover;filter:brightness(.82) saturate(1.12)}
 .calendar-card:hover .calendar-card-art img{filter:brightness(.95) saturate(1.15)}
+
+/* Hydra 3.2: presenza nel calendario */
+.calendar-att-panel .attendance-counts{margin:16px 0 12px}
+.calendar-att-panel .attendance-list{max-height:330px;overflow:auto}
+.calendar-att-panel .field{margin:16px 0 10px}
+.calendar-att-panel .attendance-actions{display:flex;gap:10px;flex-wrap:wrap}
+.calendar-att-panel .attendance-choice:disabled{opacity:.45;cursor:not-allowed}
+.calendar-att-message{min-height:1.4em;color:#27f4d2}
