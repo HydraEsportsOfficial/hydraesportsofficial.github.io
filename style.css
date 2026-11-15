@@ -222,3 +222,7 @@
 /* 4.0.6.2 — No light tiles: preserve the three original emblems in grayscale. */
 .team-mini-logo--detailed{background:transparent!important;border-radius:0!important;padding:7px 5px!important}
 .team-mini-logo--detailed img{filter:grayscale(1) brightness(1.35) contrast(1.25)!important}
+
+/* Hydra 4.0.6.3: Cadillac white symbol, no light tile; Twitch official asset. */
+.team-mini-logo--cadillac img{filter:grayscale(1) brightness(0) invert(1)!important}
+.twitch-official-logo{display:block;width:72px;height:72px;object-fit:contain;margin:0 auto 14px;border-radius:15px}
