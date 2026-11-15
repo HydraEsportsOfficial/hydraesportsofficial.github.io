@@ -258,3 +258,6 @@
 .rule-download-button{display:inline-flex;align-items:center;justify-content:center;text-align:center;padding:13px 18px;border-radius:9px;background:#d4b474;color:#07111e;font-weight:800;text-decoration:none;white-space:normal}
 .rule-download-button:hover{background:#f1d59c}
 @media(max-width:700px){.progress-canvas svg{height:390px}.progress-controls{width:100%}.rule-download-button{width:100%}}
+
+/* 4.0.6.7: remove remaining diagonal gold stripe over next GP photograph */
+.race-visual::before,.race-visual:before{content:none!important;display:none!important}
