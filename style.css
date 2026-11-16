@@ -503,3 +503,13 @@ body {
 }
 @media(max-width:760px){body{animation-duration:110s;}}
 @media(prefers-reduced-motion:reduce){body{animation:none!important;}}
+
+/* HYDRA 4.2.1.11: Admin navigation and dedicated results workspace */
+.admin-shell{display:grid;grid-template-columns:minmax(180px,225px) minmax(0,1fr);gap:18px;align-items:start;margin-top:18px}
+.admin-section-nav{display:flex;flex-direction:column;gap:8px;position:sticky;top:90px;padding:14px;border:1px solid rgba(200,164,100,.2);border-radius:14px;background:rgba(8,22,37,.85)}
+.admin-section-nav button{text-align:left;border:1px solid transparent;border-radius:9px;padding:13px 12px;background:transparent;color:#d9e2eb;font:inherit;cursor:pointer}
+.admin-section-nav button:hover,.admin-section-nav button.active{background:rgba(198,160,92,.13);border-color:rgba(198,160,92,.45);color:#f5d69c}
+.admin-section-content,.admin-tab-panel{min-width:0}
+.admin-tab-panel[hidden]{display:none!important}
+.admin-tab-panel>.panel{margin-top:0;margin-bottom:18px}
+@media(max-width:850px){.admin-shell{display:block}.admin-section-nav{position:static;display:flex;flex-direction:row;overflow-x:auto;margin-bottom:16px;scrollbar-width:thin}.admin-section-nav button{flex:0 0 auto;white-space:nowrap}}
