@@ -487,24 +487,19 @@
   }
 }
 
-/* HYDRA 4.2.1.9 — Gold + blue + turquoise. Seamless 240px tile, slower motion. */
-@keyframes hydraGoldBackgroundTravel {
-  from { background-position: 0 0, center top, center top; }
-  to { background-position: 240px 0, center top, center top; }
+/* HYDRA 4.2.1.10 — sparse, independently moving, seamless color streams.
+   Each 640px texture is periodic in BOTH directions; all animation endpoints
+   are exact integer multiples of the tile size, so no reset is visible. */
+@keyframes hydraThreeStreams {
+  from {background-position:0 0,0 0,0 0,center top,center top;}
+  to {background-position:640px 0,1280px 0,1920px 0,center top,center top;}
 }
 body {
-  background-image:
-    url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22480%22%20viewBox%3D%220%200%20240%20480%22%3E%0A%3Cg%20fill%3D%22none%22%20stroke%3D%22%23e3bc75%22%20stroke-opacity%3D%22.115%22%20stroke-width%3D%222%22%3E%3Cpath%20d%3D%22M%20-480%200%20L%20-720%20480%20M%20-240%200%20L%20-480%20480%20M%200%200%20L%20-240%20480%20M%20240%200%20L%200%20480%20M%20480%200%20L%20240%20480%20M%20720%200%20L%20480%20480%22%2F%3E%3C%2Fg%3E%0A%3Cg%20fill%3D%22none%22%20stroke%3D%22%23f7da98%22%20stroke-opacity%3D%22.04%22%20stroke-width%3D%227%22%3E%3Cpath%20d%3D%22M%20-480%200%20L%20-720%20480%20M%20-240%200%20L%20-480%20480%20M%200%200%20L%20-240%20480%20M%20240%200%20L%200%20480%20M%20480%200%20L%20240%20480%20M%20720%200%20L%20480%20480%22%2F%3E%3C%2Fg%3E%0A%3Cg%20fill%3D%22none%22%20stroke%3D%22%234b92ed%22%20stroke-opacity%3D%22.13%22%20stroke-width%3D%221.8%22%3E%3Cpath%20d%3D%22M%20-398%200%20L%20-638%20480%20M%20-158%200%20L%20-398%20480%20M%2082%200%20L%20-158%20480%20M%20322%200%20L%2082%20480%20M%20562%200%20L%20322%20480%20M%20802%200%20L%20562%20480%22%2F%3E%3C%2Fg%3E%0A%3Cg%20fill%3D%22none%22%20stroke%3D%22%234b92ed%22%20stroke-opacity%3D%22.035%22%20stroke-width%3D%226%22%3E%3Cpath%20d%3D%22M%20-398%200%20L%20-638%20480%20M%20-158%200%20L%20-398%20480%20M%2082%200%20L%20-158%20480%20M%20322%200%20L%2082%20480%20M%20562%200%20L%20322%20480%20M%20802%200%20L%20562%20480%22%2F%3E%3C%2Fg%3E%0A%3Cg%20fill%3D%22none%22%20stroke%3D%22%2335dfd0%22%20stroke-opacity%3D%22.15%22%20stroke-width%3D%221.8%22%3E%3Cpath%20d%3D%22M%20-319%200%20L%20-559%20480%20M%20-79%200%20L%20-319%20480%20M%20161%200%20L%20-79%20480%20M%20401%200%20L%20161%20480%20M%20641%200%20L%20401%20480%20M%20881%200%20L%20641%20480%22%2F%3E%3C%2Fg%3E%0A%3Cg%20fill%3D%22none%22%20stroke%3D%22%2335dfd0%22%20stroke-opacity%3D%22.035%22%20stroke-width%3D%226%22%3E%3Cpath%20d%3D%22M%20-319%200%20L%20-559%20480%20M%20-79%200%20L%20-319%20480%20M%20161%200%20L%20-79%20480%20M%20401%200%20L%20161%20480%20M%20641%200%20L%20401%20480%20M%20881%200%20L%20641%20480%22%2F%3E%3C%2Fg%3E%0A%3C%2Fsvg%3E"),
-    radial-gradient(ellipse at 60% -15%, #1d3550 0%, transparent 38%),
-    linear-gradient(180deg,#07111d,#091625 45%,#07111e);
-  background-size: 240px 480px, auto, auto;
-  background-repeat: repeat, no-repeat, no-repeat;
-  background-attachment: fixed, fixed, fixed;
-  animation: hydraGoldBackgroundTravel 23s linear infinite;
+ background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22640%22%20height%3D%22640%22%20viewBox%3D%220%200%20640%20640%22%3E%3Cpath%20d%3D%22M%20-1160%200%20L%20-1800%20640%20M%20-520%200%20L%20-1160%20640%20M%20120%200%20L%20-520%20640%20M%20760%200%20L%20120%20640%20M%201400%200%20L%20760%20640%20M%202040%200%20L%201400%20640%22%20stroke%3D%22%23e3bc75%22%20stroke-opacity%3D%22.115%22%20stroke-width%3D%222%22%20fill%3D%22none%22%2F%3E%3C%2Fsvg%3E"),url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22640%22%20height%3D%22640%22%20viewBox%3D%220%200%20640%20640%22%3E%3Cpath%20d%3D%22M%20-930%200%20L%20-1570%20640%20M%20-290%200%20L%20-930%20640%20M%20350%200%20L%20-290%20640%20M%20990%200%20L%20350%20640%20M%201630%200%20L%20990%20640%20M%202270%200%20L%201630%20640%22%20stroke%3D%22%234b92ed%22%20stroke-opacity%3D%22.13%22%20stroke-width%3D%222%22%20fill%3D%22none%22%2F%3E%3C%2Fsvg%3E"),url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22640%22%20height%3D%22640%22%20viewBox%3D%220%200%20640%20640%22%3E%3Cpath%20d%3D%22M%20-750%200%20L%20-1390%20640%20M%20-110%200%20L%20-750%20640%20M%20530%200%20L%20-110%20640%20M%201170%200%20L%20530%20640%20M%201810%200%20L%201170%20640%20M%202450%200%20L%201810%20640%22%20stroke%3D%22%2335dfd0%22%20stroke-opacity%3D%22.15%22%20stroke-width%3D%222%22%20fill%3D%22none%22%2F%3E%3C%2Fsvg%3E"),radial-gradient(ellipse at 60% -15%,#1d3550 0%,transparent 38%),linear-gradient(180deg,#07111d,#091625 45%,#07111e);
+ background-size:640px 640px,640px 640px,640px 640px,auto,auto;
+ background-repeat:repeat,repeat,repeat,no-repeat,no-repeat;
+ background-attachment:fixed,fixed,fixed,fixed,fixed;
+ animation:hydraThreeStreams 80s linear infinite;
 }
-@media (max-width:760px) {
-  body {animation-duration:32s;}
-}
-@media (prefers-reduced-motion:reduce) {
-  body {animation:none!important;}
-}
+@media(max-width:760px){body{animation-duration:110s;}}
+@media(prefers-reduced-motion:reduce){body{animation:none!important;}}
