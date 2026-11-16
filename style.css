@@ -517,3 +517,21 @@ main, body > footer {position:relative;z-index:1}
 @media (prefers-reduced-motion:reduce) {
   body::before {animation:none!important;opacity:.35!important}
 }
+
+/* HYDRA 4.2.1.1 — More visible ambient background; no layout/scroll changes. */
+body::before {
+  background:
+    repeating-linear-gradient(116deg, transparent 0 105px, rgba(241,213,156,.19) 106px, rgba(241,213,156,.045) 109px, transparent 115px, transparent 215px),
+    linear-gradient(116deg, transparent 24%, rgba(212,180,116,.22) 44%, rgba(212,180,116,.055) 48%, transparent 62%),
+    radial-gradient(ellipse at 74% 29%, rgba(52,112,167,.27), transparent 60%);
+  opacity:.9;
+  animation:hydraAmbientDriftStrong 22s linear infinite alternate;
+}
+@keyframes hydraAmbientDriftStrong {
+  0% {background-position:0% 0%,0% 50%,center;opacity:.70}
+  100% {background-position:55% 30%,75% 50%,center;opacity:1}
+}
+@media(max-width:760px) {
+  body::before {opacity:.65;background-size:140% 140%,180% 180%,100% 100%;animation-duration:32s}
+}
+@media(prefers-reduced-motion:reduce) {body::before {animation:none!important;opacity:.6!important}}
