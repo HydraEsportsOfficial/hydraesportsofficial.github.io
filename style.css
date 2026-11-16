@@ -383,3 +383,23 @@
   #calendar .calendar-league-name{min-width:42px!important;font-size:10px!important}
   #calendar .calendar-league-date{font-size:10px!important}
 }
+
+/* 4.1.6 — Mobile calendar: track in round header, half-width image, compact league dates. */
+.calendar-mobile-track{display:none}
+@media(max-width:760px){
+ #calendar .calendar-card{grid-template-columns:50% minmax(0,1fr)!important;grid-template-rows:auto minmax(116px,auto) auto!important}
+ #calendar .calendar-card-top{grid-column:1/-1!important;grid-row:1!important;gap:6px!important;padding:10px 12px!important}
+ #calendar .calendar-card-top>span:first-child{min-width:0;display:flex;align-items:center;gap:5px;white-space:nowrap;font-size:clamp(12px,3.6vw,16px)!important;letter-spacing:.3px!important}
+ #calendar .calendar-mobile-track{display:inline;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#f4f6fa}
+ #calendar .calendar-country-flag{flex-shrink:0}
+ #calendar .calendar-card-badge{flex-shrink:0;font-size:9px!important;padding:5px 7px!important}
+ #calendar .calendar-card-art{grid-column:1!important;grid-row:2!important;min-height:116px!important;height:auto!important}
+ #calendar .calendar-card-main{display:none!important}
+ #calendar .calendar-leagues{grid-column:2!important;grid-row:2!important;align-self:center!important;display:flex!important;flex-direction:column!important;justify-content:center!important;gap:5px!important;padding:8px 8px!important;min-width:0}
+ #calendar .calendar-league{display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:2px!important;padding:4px 0!important}
+ #calendar .calendar-league-name{min-width:0!important;font-size:clamp(11px,3vw,13px)!important}
+ #calendar .calendar-league-date{font-size:clamp(11px,3vw,13px)!important;white-space:nowrap!important}
+ #calendar .calendar-league-status{display:none!important}
+ #calendar .calendar-card-foot{grid-column:1/-1!important;grid-row:3!important}
+}
+@media(max-width:380px){#calendar .calendar-card-top>span:first-child{font-size:12px!important}#calendar .calendar-card-badge{font-size:8px!important}}
