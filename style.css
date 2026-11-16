@@ -535,3 +535,27 @@ body::before {
   body::before {opacity:.65;background-size:140% 140%,180% 180%,100% 100%;animation-duration:32s}
 }
 @media(prefers-reduced-motion:reduce) {body::before {animation:none!important;opacity:.6!important}}
+
+
+/* HYDRA 4.2.1.2 — MAX intensity preview: gold streaks visibly above opaque page backgrounds. */
+body::before {
+  position:fixed!important;
+  inset:0!important;
+  z-index:90!important;
+  pointer-events:none!important;
+  background:
+    repeating-linear-gradient(116deg,transparent 0 66px,rgba(255,221,135,.92) 67px,rgba(255,204,87,.74) 69px,rgba(255,204,87,.15) 74px,transparent 88px,transparent 162px),
+    linear-gradient(116deg,transparent 12%,rgba(255,214,104,.50) 34%,rgba(255,226,148,.19) 44%,transparent 65%),
+    radial-gradient(ellipse at 72% 32%,rgba(80,145,207,.38),transparent 66%)!important;
+  background-size:125% 125%,165% 165%,100% 100%!important;
+  background-repeat:repeat,no-repeat,no-repeat!important;
+  mix-blend-mode:screen!important;
+  opacity:1!important;
+  animation:hydraGoldMax 12s linear infinite alternate!important;
+}
+@keyframes hydraGoldMax {
+  0% {background-position:0% 0%,-40% 40%,center;opacity:.8}
+  100% {background-position:85% 50%,95% 40%,center;opacity:1}
+}
+@media(max-width:760px){body::before{background-size:175% 175%,205% 205%,100% 100%!important;animation-duration:17s!important}}
+@media(prefers-reduced-motion:reduce){body::before{animation:none!important;opacity:.75!important}}
