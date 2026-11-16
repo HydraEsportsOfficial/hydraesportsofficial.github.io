@@ -467,3 +467,22 @@
  body.calendar-report-open #calendar.page.active{animation:none!important;transform:none!important;filter:none!important;perspective:none!important}
  #calendar-detail:not([hidden]){height:100dvh!important;max-height:100dvh!important;overflow-y:scroll!important;-webkit-overflow-scrolling:touch!important;touch-action:pan-y!important;box-sizing:border-box!important}
 }
+
+/* HYDRA 4.2.0.2 — Desktop standings: one document scrollbar, no nested table scrolling.
+   Keep the mobile layout and the Race Report fix untouched. */
+@media (min-width: 761px) {
+  #standings .standings-duo .standings-card {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  #standings .standings-duo .table-panel {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  #standings .standings-duo .hydra-standings {
+    height: auto !important;
+    max-height: none !important;
+  }
+}
