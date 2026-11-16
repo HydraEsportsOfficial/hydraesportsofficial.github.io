@@ -39,7 +39,7 @@ renderCalendar(races,results);
 const sel=$('#race-select'),prev=sel.value;sel.innerHTML='<option value="">Seleziona una gara</option>'+races.map(r=>`<option value="${r.id}">${esc(`R${r.round_number} · ${r.circuit} · Lega ${r.league}`)}</option>`).join('');sel.value=races.some(r=>String(r.id)===prev)?prev:'';renderResults();
 const pu=data.hydra_team_power_units||[];
 $('#resource-table').innerHTML=grid(['Scuderia','COIN','PU 1','PU 2','PU 3','PU 4','Totale PU residue'],teams.map(t=>{const slots=pu.filter(x=>x.team_id===t.id);const v=n=>{const x=slots.find(x=>x.slot===n);return x?`${x.remaining}/${x.total}`:'—'};return[t.name,t.coin_balance??'—',v(1),v(2),v(3),v(4),slots.length===4?slots.reduce((a,x)=>a+x.remaining,0):'—']}));
-$('#resource-mobile-cards').innerHTML=teams.map(t=>{const slots=pu.filter(x=>x.team_id===t.id);const slot=n=>{const x=slots.find(x=>x.slot===n);return x?`${x.remaining}/${x.total}`:'—'};const total=slots.length===4?slots.reduce((sum,x)=>sum+Number(x.remaining||0),0):'—';return `<article class="resource-mobile-card" style="--team-accent:${hydraTeamColor(t.name)}"><h3>${esc(t.name)}</h3><div class="resource-mobile-metrics"><div><small>SALDO COIN</small><strong>${esc(t.coin_balance??'—')}</strong></div><div><small>PU DISPONIBILI</small><strong>${esc(total)}</strong></div></div><div class="resource-mobile-slots">${[1,2,3,4].map(n=>`<div><span>PU ${n}</span><b>${esc(slot(n))}</b></div>`).join('')}</div></article>`}).join('');
+$('#resource-mobile-cards').innerHTML=teams.map(t=>{const slots=pu.filter(x=>x.team_id===t.id);const slot=n=>{const x=slots.find(x=>x.slot===n);return x?`${x.remaining}/${x.total}`:'—'};const total=slots.length===4?slots.reduce((sum,x)=>sum+Number(x.remaining||0),0):'—';return `<article class="resource-mobile-card" style="--team-accent:${hydraTeamColor(t.name)}"><div class="resource-team-heading"><span class="resource-team-logo">${hydraTeamMark(t)}</span><h3>${esc(t.name)}</h3></div><div class="resource-mobile-metrics"><div><small>SALDO COIN</small><strong>${esc(t.coin_balance??'—')}</strong></div><div><small>PU DISPONIBILI</small><strong>${esc(total)}</strong></div></div><div class="resource-mobile-slots">${[1,2,3,4].map(n=>`<div><span>PU ${n}</span><b>${esc(slot(n))}</b></div>`).join('')}</div></article>`}).join('');
 }
 
 let calendarSelectedRound=null;
@@ -80,6 +80,8 @@ function renderCalendar(races,results){
  }).join('')||'<p class="empty">Nessun Gran Premio ancora inserito.</p>';
  document.querySelectorAll('[data-calendar-round]').forEach(b=>b.onclick=()=>{
   const n=Number(b.dataset.calendarRound);
+  const roundRaces=byRound.get(n)||[];
+  if(roundRaces.some(r=>r.status==='scheduled')){openCalendarAttendanceModal(n);return;}
   calendarSelectedRound=calendarSelectedRound===n?null:n;
   renderCalendar(races,results);
   if(calendarSelectedRound!==null)$('#calendar-detail').scrollIntoView({behavior:'smooth',block:'nearest'});
@@ -140,6 +142,54 @@ function bindCalendarAttendance(){
  });
 }
 
+// 4.1.1 — one accessible attendance dialog per selected future round.
+let calendarModalRound=null;
+function calendarModalRace(){return (data.hydra_races||[]).find(r=>Number(r.round_number)===calendarModalRound&&r.league===$('#calendar-modal-league').value&&r.status==='scheduled')||null}
+function openCalendarAttendanceModal(round){
+ calendarModalRound=round;
+ const scheduled=(data.hydra_races||[]).filter(r=>Number(r.round_number)===round&&r.status==='scheduled');
+ const first=scheduled.find(r=>!deadlinePassed(r))||scheduled[0];
+ if(!first)return;
+ $('#calendar-modal-league').value=first.league;
+ $('#calendar-modal-message').textContent='';
+ $('#calendar-attendance-overlay').hidden=false;document.body.classList.add('profile-open');
+ renderCalendarModal();$('#calendar-modal-league').focus();
+}
+function closeCalendarAttendanceModal(){
+ $('#calendar-attendance-overlay').hidden=true;document.body.classList.remove('profile-open');calendarModalRound=null;
+}
+function renderCalendarModal(){
+ const league=$('#calendar-modal-league').value,race=calendarModalRace(),driver=$('#calendar-modal-driver');
+ const old=driver.value;
+ const drivers=(data.hydra_drivers||[]).filter(d=>!d.archived&&d.league===league).sort((a,b)=>a.gamertag.localeCompare(b.gamertag,'it'));
+ driver.innerHTML='<option value="">Seleziona il tuo nickname</option>'+drivers.map(d=>`<option value="${d.id}">${esc(d.gamertag)} · ${esc(nameOf('hydra_teams',d.team_id)||'WILD')}</option>`).join('');
+ if(drivers.some(d=>String(d.id)===old))driver.value=old;
+ $('#calendar-modal-race').textContent=`Round ${String(calendarModalRound).padStart(2,'0')} · Lega ${league} · ${race?.circuit||'Gara non programmata'}`;
+ const closed=!race||deadlinePassed(race);
+ $('#calendar-modal-deadline').textContent=!race?'Nessuna gara futura programmata per questa lega.':`Scadenza: ${attDeadline(race)?italyDate(attDeadline(race)):'ore 18:00 del giorno della gara (Italia)'} · ${closed?'Conferme chiuse':'Conferme aperte'}`;
+ driver.disabled=!race;
+ $('#calendar-modal-yes').disabled=$('#calendar-modal-no').disabled=closed;
+ const response=(data.hydra_attendance||[]).find(a=>race&&String(a.race_id)===String(race.id)&&String(a.driver_id)===driver.value)?.response;
+ $('#calendar-modal-current').textContent=driver.value?'Risposta attuale: '+(response==='present'?'Presente':response==='absent'?'Assente':'In attesa'):'Seleziona il tuo nickname per confermare.';
+}
+$('#calendar-modal-league').addEventListener('change',()=>{$('#calendar-modal-driver').value='';$('#calendar-modal-message').textContent='';renderCalendarModal()});
+$('#calendar-modal-driver').addEventListener('change',renderCalendarModal);
+document.querySelectorAll('[data-close-calendar-att]').forEach(b=>b.addEventListener('click',closeCalendarAttendanceModal));
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#calendar-attendance-overlay').hidden)closeCalendarAttendanceModal()});
+for(const [id,response] of [['calendar-modal-yes','present'],['calendar-modal-no','absent']]){
+ $('#'+id).addEventListener('click',async()=>{
+  const race=calendarModalRace(),driverId=Number($('#calendar-modal-driver').value),message=$('#calendar-modal-message');
+  if(!race){message.textContent='Nessuna gara programmata per questa lega.';return}
+  if(!driverId){message.textContent='Seleziona prima il tuo nickname.';return}
+  if(deadlinePassed(race)){message.textContent='Termine per le conferme scaduto.';renderCalendarModal();return}
+  $('#calendar-modal-yes').disabled=$('#calendar-modal-no').disabled=true;message.textContent='Salvataggio in corso…';
+  try{
+   await request('/rest/v1/hydra_attendance?on_conflict=race_id,driver_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({race_id:race.id,driver_id:driverId,response})});
+   data.hydra_attendance=await request('/rest/v1/hydra_attendance?select=*');
+   renderCalendarModal();message.textContent='Risposta salvata correttamente.';
+  }catch(e){renderCalendarModal();message.textContent='Salvataggio non riuscito: '+e.message}
+ });
+}
 function renderResults(){const raceId=Number($('#race-select').value);const rows=(data.hydra_results||[]).filter(r=>r.race_id===raceId).sort((a,b)=>(a.finishing_position??999)-(b.finishing_position??999));$('#results-table').innerHTML=grid(['Pos.','Pilota','Esito','Punti','Note'],rows.map(r=>[r.finishing_position??'—',nameOf('hydra_drivers',r.driver_id),r.status,r.points,r.notes||'—']))}
 function page(name){document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===name));document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===name));window.scrollTo(0,0)}$('#hydra-twitch').onclick=()=>window.open('https://www.twitch.tv/hydraesports_series','_blank','noopener,noreferrer');document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>page(b.dataset.page));document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>page(b.dataset.go));document.querySelectorAll('[data-league]').forEach(b=>b.onclick=()=>{league=b.dataset.league;document.querySelectorAll('[data-league]').forEach(x=>x.classList.toggle('selected',x===b));render()});$('#race-select').onchange=renderResults;
 async function login(e){e.preventDefault();const user=$('#login-name').value.trim();if(user.toLowerCase()!==ADMIN_LOGIN.toLowerCase()){alert('Credenziali non valide');return}const password=$('#login-password').value;try{const r=await request('/auth/v1/token?grant_type=password',{method:'POST',body:JSON.stringify({email:ADMIN_EMAIL,password})});token=r.access_token;sessionStorage.setItem('hydra_session',JSON.stringify({access_token:r.access_token,refresh_token:r.refresh_token}));$('#login-password').value='';await checkAdmin()}catch(e){token=null;alert('Accesso non riuscito: '+e.message)}}

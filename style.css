@@ -280,3 +280,32 @@
  .mobile-bottom-nav{position:fixed;z-index:80;bottom:0;left:0;right:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));height:calc(65px + env(safe-area-inset-bottom,0px));padding-bottom:env(safe-area-inset-bottom,0px);background:#091b2b;border-top:1px solid #50637a;box-shadow:0 -8px 28px #0009}.mobile-bottom-nav button{min-width:0;background:none;border:0;color:#a6b4c6;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:clamp(9px,2.3vw,11px);padding:5px 0}.mobile-bottom-nav button.active{color:#f1d59c;background:linear-gradient(0deg,#d4b47416,transparent)}.mobile-bottom-nav button.active:before{content:'';position:absolute;top:0;width:30px;height:2px;background:#d4b474}.mobile-nav-icon{font-size:23px;line-height:1.1}.mobile-more-backdrop:not([hidden]){display:block;position:fixed;inset:0;z-index:85;background:#0009}.mobile-more-menu:not([hidden]){display:block;position:fixed;bottom:calc(65px + env(safe-area-inset-bottom,0px));left:10px;right:10px;z-index:90;background:#10253b;border:1px solid #6a614d;border-radius:16px 16px 8px 8px;padding:12px;box-shadow:0 -14px 50px #0008}.mobile-more-heading{display:flex;align-items:center;justify-content:space-between;color:#d4b474;letter-spacing:1px;padding:8px 9px 12px}.mobile-more-heading button{background:none;color:#fff;border:0;font-size:20px}.mobile-more-menu>button{display:flex;justify-content:space-between;align-items:center;width:100%;background:#172e46;border:1px solid #34516e;border-radius:9px;color:#fff;text-align:left;padding:15px;margin:7px 0;font-weight:700}.mobile-more-menu>button span{color:#d4b474;font-size:20px}
 }
 @media(max-width:360px){.brand-type{font-size:22px}.brand-type small{font-size:9px}.panel-tag{display:none}.hero h1{font-size:37px!important}.resource-mobile-card{padding:12px}}
+
+/* Hydra 4.1.1 — resource cards on desktop and mobile */
+#resource-table{display:none!important}
+.resource-mobile-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.resource-mobile-card{min-width:0;background:linear-gradient(145deg,#142a43,#0b1b30);border:1px solid #425b75;border-left:4px solid var(--team-accent,#d4b474);border-radius:13px;padding:18px}
+.resource-team-heading{display:flex;align-items:center;gap:12px;min-width:0;margin-bottom:14px}
+.resource-team-heading h3{margin:0;font-size:17px;line-height:1.25;overflow-wrap:anywhere}
+.resource-team-logo{display:grid;place-items:center;flex:0 0 64px;width:64px;height:48px}
+.resource-team-logo .team-mini-logo{width:64px;height:48px;background:transparent!important;border:0!important;padding:3px}
+.resource-team-logo .team-mini-logo img{max-width:100%;max-height:100%;object-fit:contain}
+.resource-mobile-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.resource-mobile-metrics>div{background:#071827;border-radius:9px;padding:12px}
+.resource-mobile-metrics small{display:block;color:#a6b4c6;font-size:10px;letter-spacing:.6px}
+.resource-mobile-metrics strong{display:block;color:#f1d59c;font-size:24px;margin-top:5px}
+.resource-mobile-slots{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin-top:12px}
+.resource-mobile-slots>div{background:#10263d;border-radius:7px;text-align:center;padding:8px 2px}
+.resource-mobile-slots span{display:block;color:#a6b4c6;font-size:10px}
+.resource-mobile-slots b{display:block;font-size:13px;margin-top:3px}
+.attendance-modal-dialog{width:min(500px,100%)}
+.attendance-modal-dialog h2{font:800 clamp(28px,5vw,37px) 'Barlow Condensed',sans-serif;text-transform:uppercase;margin:12px 30px 6px 0;color:#f1d59c}
+.attendance-modal-dialog .field{margin-top:15px}
+.attendance-modal-dialog select{width:100%;max-width:100%;min-height:46px}
+.attendance-modal-dialog .attendance-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
+.attendance-modal-dialog .attendance-choice{min-height:48px}
+@media(max-width:1050px){.resource-mobile-cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){.resource-mobile-cards{grid-template-columns:1fr}.resource-team-logo{flex-basis:52px;width:52px;height:42px}.resource-team-logo .team-mini-logo{width:52px;height:42px}.attendance-modal-dialog{max-height:calc(100dvh - 90px);padding:20px}}
+
+/* 4.1.1: standings tables are desktop-only; mobile keeps the championship charts. */
+@media(max-width:760px){#standings #standings-league-content,#standings #standings-general-content{display:none!important}}
