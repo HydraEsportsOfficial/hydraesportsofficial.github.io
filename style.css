@@ -487,20 +487,21 @@
   }
 }
 
+/* HYDRA 4.2.1.6 — Seamless, softer animated background */
 /* HYDRA 4.2.1.5 — True animated BACKGROUND, never a foreground overlay.
    All gold streaks are painted on the BODY BACKGROUND itself.
    No pseudo-elements, z-index, transforms or stacking-context changes. */
 @keyframes hydraGoldBackgroundTravel {
   from { background-position: 0 0, center top, center top; }
-  to   { background-position: 210px 0, center top, center top; }
+  to   { background-position: 233.64641px 0, center top, center top; }
 }
 body {
   background-image:
     repeating-linear-gradient(116deg,
       transparent 0 91px,
-      rgba(255,216,135,.08) 94px,
-      rgba(255,216,135,.43) 96px,
-      rgba(255,216,135,.10) 99px,
+      rgba(255,216,135,.04) 94px,
+      rgba(255,216,135,.23) 96px,
+      rgba(255,216,135,.05) 99px,
       transparent 106px,
       transparent 210px),
     radial-gradient(ellipse at 60% -15%, #1d3550 0%, transparent 38%),
