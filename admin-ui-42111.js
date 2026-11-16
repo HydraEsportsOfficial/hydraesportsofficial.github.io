@@ -1,4 +1,4 @@
-/* HYDRA 4.2.1.11: non-invasive admin UI enhancement */
+/* HYDRA 4.2.1.13: fix driver-only duplicate filtering (no team ID collisions) */
 (()=>{
 'use strict';
 const nav=document.querySelector('.admin-section-nav');
@@ -13,7 +13,7 @@ function isNicknameSelect(s){if(nicknameSelectIds.has(s.id))return true;if(raceR
 function sortOptions(options){const fixed=options.filter(o=>!o.value || o.disabled&&/seleziona|scegli/i.test(o.textContent));const rest=options.filter(o=>!fixed.includes(o)).sort((a,b)=>collator.compare(a.textContent.trim(),b.textContent.trim()));return [...fixed,...rest];}
 function refresh(){if(updating)return;updating=true;try{
  const selects=[...document.querySelectorAll('select')].filter(isNicknameSelect);
- const raceSelects=raceRoot?[...raceRoot.querySelectorAll('select')].filter(s=>{const opts=[...s.options];return opts.length>2&&opts.some(o=>o.value&&/[a-z]/i.test(o.textContent)) && !/position|posizione|team|scuderia|penalt|dnf/i.test(s.id+' '+s.name)}):[];
+ const raceSelects=raceRoot?[...raceRoot.querySelectorAll('select[data-field="driver_id"]')]:[];
  // Track selected pilot IDs only within race editor, not other admin controls.
  const used=new Map();for(const s of raceSelects){if(s.value)used.set(s.value,(used.get(s.value)||0)+1)}
  for(const s of selects){const current=s.value;const signature=[...s.options].map(o=>o.value+'\u0001'+o.textContent).join('\u0002');const old=originals.get(s);
