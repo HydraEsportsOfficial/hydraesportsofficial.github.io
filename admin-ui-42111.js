@@ -33,5 +33,18 @@ document.addEventListener('change',e=>{if(e.target.matches('select')&&isNickname
  if(raceRoot?.contains(e.target)){for(const s of raceRoot.querySelectorAll('select')){const old=originals.get(s);if(old){const options=old.options;const sig=options.map(o=>o.value+'\u0001'+o.textContent).join('\u0002');originals.set(s,{signature:sig,options})}}}
  schedule();
 }},true);
+// Fix: after a restored Admin session, checkAdmin() renders legacy admin controls
+// without calling render406Admin(), leaving the GP selector empty until another load.
+// Initialize it once the authenticated admin panel becomes visible.
+const adminBox=document.getElementById('admin-box');
+function ensureRaceOptions(){
+ const select=document.getElementById('admin-race-select');
+ if(!select || !adminBox || adminBox.hidden || select.options.length>0)return;
+ if(typeof render406Admin==='function' && typeof data!=='undefined' && Array.isArray(data.hydra_races) && data.hydra_races.length){
+   render406Admin();
+ }
+}
+if(adminBox){new MutationObserver(ensureRaceOptions).observe(adminBox,{attributes:true,attributeFilter:['hidden']});}
+ensureRaceOptions();
 const observer=new MutationObserver(schedule);observer.observe(document.body,{childList:true,subtree:true});schedule();
 })();
