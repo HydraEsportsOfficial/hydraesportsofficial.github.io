@@ -435,3 +435,28 @@
  #calendar-detail .calendar-mobile-extra summary{cursor:pointer;color:#d4b474;list-style-position:inside;padding:3px 0}
  #calendar-detail .calendar-mobile-extra div{padding:6px 0;line-height:1.5}
 }
+
+/* HYDRA 4.2.0 — visual motion, with accessibility fallback */
+@keyframes hydraHeroIn{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:translateY(0)}}
+@keyframes hydraReveal{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes hydraLight{0%,100%{opacity:.25;transform:translateX(-7%)}50%{opacity:.52;transform:translateX(7%)}}
+.page.active{animation:hydraHeroIn .28s ease-out both}
+.hero-copy h1{animation:hydraHeroIn .65s .08s ease-out both}
+.hero-community-tagline{animation:hydraHeroIn .65s .18s ease-out both}
+.hero-community-subtitle{animation:hydraHeroIn .65s .28s ease-out both}
+.hero-art img{animation:hydraHeroIn 1s .12s ease-out both}
+.hero::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(105deg,transparent 22%,rgba(212,180,116,.09) 48%,transparent 69%);animation:hydraLight 9s ease-in-out infinite}
+.hydra-reveal{opacity:0;transform:translateY(12px)}
+.hydra-reveal.hydra-revealed{animation:hydraReveal .42s ease-out var(--hydra-delay,0ms) forwards}
+#team-cards article,.calendar-card,.resource-team-card{transition:transform .24s ease,border-color .24s ease,box-shadow .24s ease}
+@media(hover:hover) and (pointer:fine){#team-cards article:hover,.resource-team-card:hover{transform:translateY(-4px);border-color:var(--gold);box-shadow:0 12px 32px rgba(0,0,0,.3),0 0 19px rgba(212,180,116,.12)}.calendar-card:hover{box-shadow:0 13px 35px rgba(0,0,0,.34),0 0 18px rgba(212,180,116,.13)}}
+.hydra-countdown{margin:13px 0 15px;padding:12px 14px;border:1px solid rgba(212,180,116,.45);border-radius:9px;background:linear-gradient(100deg,rgba(212,180,116,.11),rgba(212,180,116,.02));display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.hydra-countdown-label{font-size:10px;font-weight:800;letter-spacing:1px;color:var(--goldlight)}
+.hydra-countdown strong{font-size:18px;letter-spacing:.4px;color:var(--goldlight);white-space:nowrap}
+.hydra-countdown small{font-size:10px;color:var(--muted)}
+.hydra-podium{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:13px 0 18px}
+.hydra-podium-place{min-width:0;text-align:center;padding:12px 6px;background:linear-gradient(160deg,#18314a,#0b1d2e);border:1px solid #476077;border-radius:10px;display:flex;flex-direction:column;gap:5px;justify-content:center}
+.hydra-podium-1{border-color:var(--gold);background:linear-gradient(150deg,#3b3529,#102236)}
+.hydra-podium-medal{font-size:24px}.hydra-podium-place strong{font-size:12px;overflow-wrap:anywhere}.hydra-podium-place small{font-size:10px;color:var(--muted);overflow-wrap:anywhere}
+@media(max-width:650px){.hydra-countdown{gap:7px}.hydra-countdown-label{width:100%}.hydra-podium{gap:5px}.hydra-podium-place{padding:9px 4px}.hydra-podium-place strong{font-size:11px}}
+@media(prefers-reduced-motion:reduce){.page.active,.hero-copy h1,.hero-community-tagline,.hero-community-subtitle,.hero-art img,.hero::after,.hydra-reveal.hydra-revealed{animation:none!important;opacity:1!important;transform:none!important}.hydra-reveal{opacity:1!important;transform:none!important}#team-cards article,.calendar-card,.resource-team-card{transition:none!important}}
