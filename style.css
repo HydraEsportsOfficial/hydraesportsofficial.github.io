@@ -440,7 +440,7 @@
 @keyframes hydraHeroIn{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:translateY(0)}}
 @keyframes hydraReveal{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 @keyframes hydraLight{0%,100%{opacity:.25;transform:translateX(-7%)}50%{opacity:.52;transform:translateX(7%)}}
-.page.active{animation:hydraHeroIn .28s ease-out both}
+.page.active{animation:hydraPageFade .28s ease-out both}
 .hero-copy h1{animation:hydraHeroIn .65s .08s ease-out both}
 .hero-community-tagline{animation:hydraHeroIn .65s .18s ease-out both}
 .hero-community-subtitle{animation:hydraHeroIn .65s .28s ease-out both}
@@ -460,3 +460,10 @@
 .hydra-podium-medal{font-size:24px}.hydra-podium-place strong{font-size:12px;overflow-wrap:anywhere}.hydra-podium-place small{font-size:10px;color:var(--muted);overflow-wrap:anywhere}
 @media(max-width:650px){.hydra-countdown{gap:7px}.hydra-countdown-label{width:100%}.hydra-podium{gap:5px}.hydra-podium-place{padding:9px 4px}.hydra-podium-place strong{font-size:11px}}
 @media(prefers-reduced-motion:reduce){.page.active,.hero-copy h1,.hero-community-tagline,.hero-community-subtitle,.hero-art img,.hero::after,.hydra-reveal.hydra-revealed{animation:none!important;opacity:1!important;transform:none!important}.hydra-reveal{opacity:1!important;transform:none!important}#team-cards article,.calendar-card,.resource-team-card{transition:none!important}}
+
+/* 4.2.0.1 — fix mobile Race Report viewport scrolling: no transform on page ancestor */
+@keyframes hydraPageFade{from{opacity:0}to{opacity:1}}
+@media(max-width:760px){
+ body.calendar-report-open #calendar.page.active{animation:none!important;transform:none!important;filter:none!important;perspective:none!important}
+ #calendar-detail:not([hidden]){height:100dvh!important;max-height:100dvh!important;overflow-y:scroll!important;-webkit-overflow-scrolling:touch!important;touch-action:pan-y!important;box-sizing:border-box!important}
+}
