@@ -362,3 +362,24 @@
  #calendar .calendar-league-name{font-size:11px!important}
  #calendar .calendar-league-date{font-size:10px!important}
 }
+
+/* 4.1.5 — compact mobile calendar, clean photos, no sticky header obscuring page titles. */
+@media (max-width:760px){
+  .site-header{position:relative!important;top:auto!important}
+  #calendar .calendar-card{grid-template-columns:minmax(126px,41%) minmax(0,1fr)!important;grid-template-rows:auto auto auto auto!important}
+  #calendar .calendar-card-art{grid-column:1!important;grid-row:2/4!important;min-height:108px!important;position:relative!important}
+  #calendar .calendar-art-number{display:none!important}
+  #calendar .calendar-card-main{grid-column:2!important;grid-row:2!important;align-self:start!important;padding:9px 10px 3px!important}
+  #calendar .calendar-card-main h3{font-size:clamp(16px,4.1vw,21px)!important;line-height:1.06!important}
+  #calendar .calendar-leagues{grid-column:2!important;grid-row:3!important;align-self:start!important;margin:0!important;padding:0 10px 8px!important}
+  #calendar .calendar-league{display:flex!important;justify-content:flex-start!important;align-items:baseline!important;flex-wrap:wrap!important;gap:3px 12px!important;padding:4px 0!important}
+  #calendar .calendar-league-name{min-width:47px!important;font-size:11px!important}
+  #calendar .calendar-league-date{font-size:11px!important;text-align:left!important}
+  #calendar .calendar-card-foot{grid-column:1/-1!important;grid-row:4!important}
+}
+@media(max-width:380px){
+  #calendar .calendar-card{grid-template-columns:minmax(110px,39%) minmax(0,1fr)!important}
+  #calendar .calendar-league{gap:3px 7px!important}
+  #calendar .calendar-league-name{min-width:42px!important;font-size:10px!important}
+  #calendar .calendar-league-date{font-size:10px!important}
+}
