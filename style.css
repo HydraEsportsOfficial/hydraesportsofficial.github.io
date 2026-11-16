@@ -486,3 +486,34 @@
     max-height: none !important;
   }
 }
+
+
+/* HYDRA 4.2.1 — Ambient racing lines. Pure CSS, no scripts, no scroll locks. */
+body::before {
+  content:"";
+  position:fixed;
+  inset:-15% -20%;
+  z-index:0;
+  pointer-events:none;
+  background:
+    repeating-linear-gradient(116deg, transparent 0 126px, rgba(212,180,116,.045) 127px, transparent 129px, transparent 245px),
+    linear-gradient(116deg, transparent 33%, rgba(212,180,116,.075) 45%, transparent 53%),
+    radial-gradient(ellipse at 75% 30%, rgba(49,90,132,.14), transparent 56%);
+  background-size: 110% 110%, 140% 140%, 100% 100%;
+  opacity:.65;
+  animation:hydraAmbientDrift 32s ease-in-out infinite alternate;
+  will-change:opacity;
+}
+/* Content stays above the decorative background; no extra scrolling containers. */
+main, body > footer {position:relative;z-index:1}
+@keyframes hydraAmbientDrift {
+  0% {background-position:0% 0%,0% 50%,center;opacity:.38}
+  50% {background-position:15% 9%,35% 50%,center;opacity:.65}
+  100% {background-position:30% 18%,70% 50%,center;opacity:.45}
+}
+@media (max-width:760px) {
+  body::before {opacity:.35;animation-duration:48s;background-size:140% 140%,180% 180%,100% 100%}
+}
+@media (prefers-reduced-motion:reduce) {
+  body::before {animation:none!important;opacity:.35!important}
+}
