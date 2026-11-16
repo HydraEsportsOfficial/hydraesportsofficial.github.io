@@ -487,75 +487,32 @@
   }
 }
 
-
-/* HYDRA 4.2.1 — Ambient racing lines. Pure CSS, no scripts, no scroll locks. */
-body::before {
-  content:"";
-  position:fixed;
-  inset:-15% -20%;
-  z-index:0;
-  pointer-events:none;
-  background:
-    repeating-linear-gradient(116deg, transparent 0 126px, rgba(212,180,116,.045) 127px, transparent 129px, transparent 245px),
-    linear-gradient(116deg, transparent 33%, rgba(212,180,116,.075) 45%, transparent 53%),
-    radial-gradient(ellipse at 75% 30%, rgba(49,90,132,.14), transparent 56%);
-  background-size: 110% 110%, 140% 140%, 100% 100%;
-  opacity:.65;
-  animation:hydraAmbientDrift 32s ease-in-out infinite alternate;
-  will-change:opacity;
+/* HYDRA 4.2.1.5 — True animated BACKGROUND, never a foreground overlay.
+   All gold streaks are painted on the BODY BACKGROUND itself.
+   No pseudo-elements, z-index, transforms or stacking-context changes. */
+@keyframes hydraGoldBackgroundTravel {
+  from { background-position: 0 0, center top, center top; }
+  to   { background-position: 210px 0, center top, center top; }
 }
-/* Content stays above the decorative background; no extra scrolling containers. */
-main, body > footer {position:relative;z-index:1}
-@keyframes hydraAmbientDrift {
-  0% {background-position:0% 0%,0% 50%,center;opacity:.38}
-  50% {background-position:15% 9%,35% 50%,center;opacity:.65}
-  100% {background-position:30% 18%,70% 50%,center;opacity:.45}
+body {
+  background-image:
+    repeating-linear-gradient(116deg,
+      transparent 0 91px,
+      rgba(255,216,135,.08) 94px,
+      rgba(255,216,135,.43) 96px,
+      rgba(255,216,135,.10) 99px,
+      transparent 106px,
+      transparent 210px),
+    radial-gradient(ellipse at 60% -15%, #1d3550 0%, transparent 38%),
+    linear-gradient(180deg,#07111d,#091625 45%,#07111e);
+  background-size: auto, auto, auto;
+  background-repeat: repeat, no-repeat, no-repeat;
+  background-attachment: fixed, fixed, fixed;
+  animation: hydraGoldBackgroundTravel 11s linear infinite;
 }
 @media (max-width:760px) {
-  body::before {opacity:.35;animation-duration:48s;background-size:140% 140%,180% 180%,100% 100%}
+  body {animation-duration:17s;}
 }
 @media (prefers-reduced-motion:reduce) {
-  body::before {animation:none!important;opacity:.35!important}
+  body {animation:none!important;}
 }
-
-/* HYDRA 4.2.1.1 — More visible ambient background; no layout/scroll changes. */
-body::before {
-  background:
-    repeating-linear-gradient(116deg, transparent 0 105px, rgba(241,213,156,.19) 106px, rgba(241,213,156,.045) 109px, transparent 115px, transparent 215px),
-    linear-gradient(116deg, transparent 24%, rgba(212,180,116,.22) 44%, rgba(212,180,116,.055) 48%, transparent 62%),
-    radial-gradient(ellipse at 74% 29%, rgba(52,112,167,.27), transparent 60%);
-  opacity:.9;
-  animation:hydraAmbientDriftStrong 22s linear infinite alternate;
-}
-@keyframes hydraAmbientDriftStrong {
-  0% {background-position:0% 0%,0% 50%,center;opacity:.70}
-  100% {background-position:55% 30%,75% 50%,center;opacity:1}
-}
-@media(max-width:760px) {
-  body::before {opacity:.65;background-size:140% 140%,180% 180%,100% 100%;animation-duration:32s}
-}
-@media(prefers-reduced-motion:reduce) {body::before {animation:none!important;opacity:.6!important}}
-
-
-/* HYDRA 4.2.1.2 — MAX intensity preview: gold streaks visibly above opaque page backgrounds. */
-body::before {
-  position:fixed!important;
-  inset:0!important;
-  z-index:90!important;
-  pointer-events:none!important;
-  background:
-    repeating-linear-gradient(116deg,transparent 0 66px,rgba(255,221,135,.92) 67px,rgba(255,204,87,.74) 69px,rgba(255,204,87,.15) 74px,transparent 88px,transparent 162px),
-    linear-gradient(116deg,transparent 12%,rgba(255,214,104,.50) 34%,rgba(255,226,148,.19) 44%,transparent 65%),
-    radial-gradient(ellipse at 72% 32%,rgba(80,145,207,.38),transparent 66%)!important;
-  background-size:125% 125%,165% 165%,100% 100%!important;
-  background-repeat:repeat,no-repeat,no-repeat!important;
-  mix-blend-mode:screen!important;
-  opacity:1!important;
-  animation:hydraGoldMax 12s linear infinite alternate!important;
-}
-@keyframes hydraGoldMax {
-  0% {background-position:0% 0%,-40% 40%,center;opacity:.8}
-  100% {background-position:85% 50%,95% 40%,center;opacity:1}
-}
-@media(max-width:760px){body::before{background-size:175% 175%,205% 205%,100% 100%!important;animation-duration:17s!important}}
-@media(prefers-reduced-motion:reduce){body::before{animation:none!important;opacity:.75!important}}
