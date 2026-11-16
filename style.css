@@ -307,5 +307,11 @@
 @media(max-width:1050px){.resource-mobile-cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:760px){.resource-mobile-cards{grid-template-columns:1fr}.resource-team-logo{flex-basis:52px;width:52px;height:42px}.resource-team-logo .team-mini-logo{width:52px;height:42px}.attendance-modal-dialog{max-height:calc(100dvh - 90px);padding:20px}}
 
-/* 4.1.1: standings tables are desktop-only; mobile keeps the championship charts. */
-@media(max-width:760px){#standings #standings-league-content,#standings #standings-general-content{display:none!important}}
+/* 4.1.2: keep league and constructor standings visible on mobile; hide only the championship trend chart. */
+@media(max-width:760px){#standings .progress-panel{display:none!important}#standings #standings-league-content:not([hidden]){display:grid!important}#standings #standings-general-content:not([hidden]){display:block!important}}
+
+/* 4.1.2: use resource cards on desktop as well, never the legacy table. */
+#resources #resource-table{display:none!important}
+#resources #resource-mobile-cards{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;width:100%}
+@media(max-width:1050px){#resources #resource-mobile-cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){#resources #resource-mobile-cards{grid-template-columns:minmax(0,1fr)}}
