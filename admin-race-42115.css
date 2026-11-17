@@ -19,3 +19,49 @@
 #admin-race-rows .hydra-time-field{min-width:155px}
 #admin-race-rows .hydra-time-field input{font-variant-numeric:tabular-nums}
 #results-table .hydra-time-cell{white-space:nowrap;font-variant-numeric:tabular-nums;color:#e7c678}
+
+
+/* HYDRA 4.2.1.17 — card layout repair. The detail row uses a true grid,
+   avoiding flex-item overlap between the lap button and penalty inputs. */
+#admin-race-rows .hydra-sortable-row{
+  grid-template-columns:42px 40px minmax(0,1.25fr) minmax(0,1fr) 28px!important;
+  column-gap:10px;row-gap:10px;align-items:end;
+}
+#admin-race-rows .hydra-sortable-row > .hydra-drag-grip{grid-column:1;grid-row:1;align-self:center;width:42px;height:42px;padding:0}
+#admin-race-rows .hydra-sortable-row > .hydra-position-badge{grid-column:2;grid-row:1;align-self:center}
+#admin-race-rows .hydra-sortable-row > label:nth-of-type(1){grid-column:3;grid-row:1;min-width:0}
+#admin-race-rows .hydra-sortable-row > label:nth-of-type(2){grid-column:4;grid-row:1;min-width:0}
+#admin-race-rows .hydra-sortable-row > .race-remove{grid-column:5;grid-row:1;align-self:center}
+#admin-race-rows .hydra-sortable-row > .race-extra{
+  grid-column:3 / 5!important;grid-row:2;
+  display:grid!important;
+  grid-template-columns:repeat(8,minmax(0,1fr));
+  align-items:end;gap:10px;
+  min-width:0;
+}
+#admin-race-rows .hydra-sortable-row .race-extra > label{
+  display:flex;flex-direction:column;justify-content:flex-end;
+  min-width:0!important;width:100%;margin:0;flex:none!important;gap:5px;
+}
+#admin-race-rows .hydra-sortable-row .race-extra > label > input,
+#admin-race-rows .hydra-sortable-row .race-extra > label > select{
+  width:100%;min-width:0;min-height:36px;box-sizing:border-box;
+}
+#admin-race-rows .hydra-sortable-row .race-extra .hydra-lap-label{min-width:0!important}
+#admin-race-rows .hydra-sortable-row .hydra-lap-button{
+  width:100%;min-width:0!important;min-height:36px;
+  padding:8px 5px;white-space:nowrap;box-sizing:border-box;
+  font-size:11px;line-height:1.25;
+}
+#admin-race-rows .hydra-sortable-row .race-extra .hydra-time-field{min-width:0!important}
+@media(max-width:1250px){
+ #admin-race-rows .hydra-sortable-row > .race-extra{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+@media(max-width:760px){
+ #admin-race-rows .hydra-sortable-row{grid-template-columns:36px 32px minmax(0,1fr) 28px!important;gap:8px}
+ #admin-race-rows .hydra-sortable-row > .hydra-drag-grip{width:36px;height:40px}
+ #admin-race-rows .hydra-sortable-row > label:nth-of-type(1){grid-column:3;grid-row:1}
+ #admin-race-rows .hydra-sortable-row > label:nth-of-type(2){grid-column:3;grid-row:2}
+ #admin-race-rows .hydra-sortable-row > .race-remove{grid-column:4;grid-row:1}
+ #admin-race-rows .hydra-sortable-row > .race-extra{grid-column:1/-1!important;grid-row:3;grid-template-columns:repeat(2,minmax(0,1fr))}
+}
