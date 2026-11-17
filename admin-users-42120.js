@@ -18,7 +18,7 @@
     e.preventDefault();
     const username = nameInput.value.trim();
     if (!usernamePattern.test(username)) { alert('Username non valido'); return; }
-    const email = username.toLowerCase() === 'dan13' ? PRIMARY_EMAIL : internalEmail(username);
+    const email = username.toLowerCase() === 'blazerevolution' ? PRIMARY_EMAIL : internalEmail(username);
     try {
       const r = await request('/auth/v1/token?grant_type=password', {
         method:'POST', body:JSON.stringify({email, password:passwordInput.value})
@@ -44,7 +44,7 @@
   panel.hidden = true;
   panel.style.cssText = 'margin:20px 0;padding:18px;border:1px solid #4a6280;border-radius:12px';
   panel.innerHTML = `<h3>Gestione account</h3>
-    <p class="muted">Solo Dan13 può gestire gli account. Gli amministratori gestiscono il campionato; gli utenti semplici sono predisposti per la futura Area Piloti e per ora non hanno accesso all'Area Admin.</p>
+    <p class="muted">Solo BlazeRevolution può gestire gli account. Gli amministratori gestiscono il campionato; gli utenti semplici sono predisposti per la futura Area Piloti e per ora non hanno accesso all'Area Admin.</p>
     <form id="hydra-add-admin" style="display:flex;flex-wrap:wrap;align-items:end;gap:10px">
       <label class="field" style="flex:1;min-width:150px">Username<input name="username" required minlength="3" maxlength="32" pattern="[A-Za-z][A-Za-z0-9_-]{2,31}" autocomplete="off" placeholder="Es. Potec"></label>
       <label class="field" style="flex:1;min-width:180px">Password iniziale<input name="password" type="password" required minlength="8" autocomplete="new-password" placeholder="Minimo 8 caratteri"></label>
@@ -129,7 +129,7 @@
     try {
       const user=await request('/auth/v1/user');
       const email=(user.email||'').toLowerCase();
-      const display=email===PRIMARY_EMAIL?'Dan13':email.endsWith('@accounts.hydra.invalid')?(user.app_metadata?.hydra_username || email.split('@')[0]):'Amministratore';
+      const display=email===PRIMARY_EMAIL?'BlazeRevolution':email.endsWith('@accounts.hydra.invalid')?(user.app_metadata?.hydra_username || email.split('@')[0]):'Amministratore';
       document.getElementById('admin-welcome').textContent='Accesso amministratore attivo · '+display;
       const isOwner=email===PRIMARY_EMAIL;
       accountTab.hidden=!isOwner;
