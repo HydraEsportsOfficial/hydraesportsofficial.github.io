@@ -1,4 +1,4 @@
-/* HYDRA 4.2.1.21 — Top 5 statistiche ufficiali */
+/* HYDRA 4.2.1.22 — Top 5 statistiche, carriera unificata per nickname (solo pagina Statistiche) */
 (()=>{
 'use strict';
 const root=document.getElementById('hydra-stats-grid');
@@ -13,6 +13,7 @@ const defs=[
 const str=x=>String(x??'');
 const num=x=>x!==null&&x!==undefined&&x!==''&&Number.isFinite(Number(x))?Number(x):null;
 const coll=new Intl.Collator('it',{sensitivity:'base',numeric:true});
+const nicknameKey=name=>str(name).normalize('NFKC').trim().replace(/\s+/g,' ').toLocaleLowerCase('it');
 function draw(){
  if(typeof data==='undefined'||!Array.isArray(data.hydra_results)){root.textContent='Caricamento statistiche…';return;}
  const drivers=data.hydra_drivers||[],races=data.hydra_races||[],results=data.hydra_results||[];
@@ -22,9 +23,11 @@ function draw(){
  for(const r of results){
   const race=rm.get(str(r.race_id)),d=dm.get(str(r.driver_id));
   if(!race||!d)continue;
-  const id=str(d.id);
-  if(!byDriver.has(id))byDriver.set(id,{name:str(d.gamertag||d.nickname||'Pilota'),rows:[],stats:{}});
-  byDriver.get(id).rows.push({r,race});
+  // Aggregazione SOLO visuale: gli ID originali e le classifiche del Campionato restano invariati.
+  const name=str(d.gamertag||d.nickname||'Pilota').trim();
+  const key=nicknameKey(name);
+  if(!byDriver.has(key))byDriver.set(key,{name,rows:[],stats:{}});
+  byDriver.get(key).rows.push({r,race});
  }
  for(const d of byDriver.values()){
   const rows=d.rows;
@@ -62,7 +65,7 @@ function draw(){
   card.append(list);root.append(card);
  }
  const info=document.getElementById('hydra-stats-info');
- if(info)info.textContent='Statistiche calcolate dai risultati ufficiali presenti nell’archivio · '+(scope==='ALL'?'Generale':scope==='A'?'Lega A':'Lega B');
+ if(info)info.textContent='Statistiche ufficiali · Profili con lo stesso nickname unificati solo qui · '+(scope==='ALL'?'Generale':scope==='A'?'Lega A':'Lega B');
 }
 tabs.forEach(b=>b.addEventListener('click',()=>{scope=b.dataset.statsLeague;tabs.forEach(x=>{x.classList.toggle('selected',x===b);x.setAttribute('aria-pressed',String(x===b));});draw();}));
 if(typeof render==='function'){
