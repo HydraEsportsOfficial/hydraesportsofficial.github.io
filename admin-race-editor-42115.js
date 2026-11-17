@@ -23,9 +23,6 @@ function decorate(){
   node.addEventListener('dragover',e=>{e.preventDefault();e.dataTransfer.dropEffect='move';node.classList.add('hydra-drop-target')});
   node.addEventListener('dragleave',()=>node.classList.remove('hydra-drop-target'));
   node.addEventListener('drop',e=>{e.preventDefault();node.classList.remove('hydra-drop-target');const from=Number(e.dataTransfer.getData('text/plain'));if(Number.isInteger(from))move(from,i)});
-  const controls=document.createElement('div');controls.className='hydra-move-controls';
-  for(const [label,delta] of [['↑',-1],['↓',1]]){const b=document.createElement('button');b.type='button';b.textContent=label;b.title=`Sposta ${delta<0?'su':'giù'}`;b.disabled=i+delta<0||i+delta>=rows.length;b.onclick=()=>move(i,i+delta);controls.appendChild(b)}
-  node.insertBefore(controls,node.querySelector('.race-remove'));
   const checkbox=node.querySelector('[data-field="fastest_lap"]');if(checkbox){
    const label=checkbox.closest('label');label.classList.add('hydra-lap-label');
    const button=document.createElement('button');button.type='button';button.className='hydra-lap-button'+(checkbox.checked?' active':'');button.textContent=checkbox.checked?'⚡ Giro veloce ✓':'⚡ Giro veloce';button.setAttribute('aria-pressed',String(checkbox.checked));

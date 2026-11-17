@@ -12,6 +12,10 @@
 #admin-race-rows .hydra-lap-label{display:block}
 #admin-race-rows .hydra-dragging{opacity:.45}
 #admin-race-rows .hydra-drop-target{outline:2px dashed #d5aa58;outline-offset:2px}
-#admin-race-rows .hydra-sortable-row{grid-template-columns:40px 42px minmax(155px,2fr) minmax(145px,1.5fr) 40px 34px!important;align-items:center}
+#admin-race-rows .hydra-sortable-row{grid-template-columns:40px 42px minmax(155px,2fr) minmax(145px,1.5fr) 34px!important;align-items:center}
 #admin-race-rows .hydra-sortable-row .race-extra{grid-column:3/-1}
-@media(max-width:800px){#admin-race-rows .hydra-sortable-row{grid-template-columns:36px 42px minmax(0,1fr) 42px 32px!important}#admin-race-rows .hydra-sortable-row>label:nth-of-type(2){grid-column:3/4}#admin-race-rows .hydra-sortable-row .race-extra{grid-column:1/-1}}
+@media(max-width:800px){#admin-race-rows .hydra-sortable-row{grid-template-columns:36px 42px minmax(0,1fr) 32px!important}#admin-race-rows .hydra-sortable-row>label:nth-of-type(2){grid-column:3/4}#admin-race-rows .hydra-sortable-row .race-extra{grid-column:1/-1}}
+
+#admin-race-rows .hydra-time-field{min-width:155px}
+#admin-race-rows .hydra-time-field input{font-variant-numeric:tabular-nums}
+#results-table .hydra-time-cell{white-space:nowrap;font-variant-numeric:tabular-nums;color:#e7c678}
