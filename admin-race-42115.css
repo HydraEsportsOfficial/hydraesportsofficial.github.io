@@ -1,0 +1,17 @@
+/* HYDRA 4.2.1.15 — result cards */
+#admin-race-rows .hydra-sortable-row{position:relative;border-left:5px solid var(--team-accent,#7b8797);background:linear-gradient(105deg,color-mix(in srgb,var(--team-accent,#7b8797) 13%,transparent),transparent 65%);transition:border-color .15s,background .15s}
+#admin-race-rows .hydra-drag-grip{cursor:grab;font-size:24px;line-height:1;touch-action:none;padding:8px 11px;background:transparent;border:1px solid currentColor;border-radius:8px;opacity:.8}
+#admin-race-rows .hydra-drag-grip:active{cursor:grabbing}
+#admin-race-rows .hydra-position-badge{font-weight:800;min-width:35px}
+#admin-race-rows .hydra-move-controls{display:flex;flex-direction:column;gap:3px}
+#admin-race-rows .hydra-move-controls button{padding:3px 10px;min-height:27px}
+#admin-race-rows .hydra-move-controls button:disabled{opacity:.25}
+#admin-race-rows .hydra-lap-button{padding:12px 18px;min-width:145px;border:1px solid #d7aa55;border-radius:12px;background:rgba(215,170,85,.07);font-weight:800;cursor:pointer}
+#admin-race-rows .hydra-lap-button.active{background:linear-gradient(120deg,#d2a343,#f8d479);color:#1c1a14;box-shadow:0 0 16px #d5a54155}
+#admin-race-rows .hydra-hidden-checkbox{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+#admin-race-rows .hydra-lap-label{display:block}
+#admin-race-rows .hydra-dragging{opacity:.45}
+#admin-race-rows .hydra-drop-target{outline:2px dashed #d5aa58;outline-offset:2px}
+#admin-race-rows .hydra-sortable-row{grid-template-columns:40px 42px minmax(155px,2fr) minmax(145px,1.5fr) 40px 34px!important;align-items:center}
+#admin-race-rows .hydra-sortable-row .race-extra{grid-column:3/-1}
+@media(max-width:800px){#admin-race-rows .hydra-sortable-row{grid-template-columns:36px 42px minmax(0,1fr) 42px 32px!important}#admin-race-rows .hydra-sortable-row>label:nth-of-type(2){grid-column:3/4}#admin-race-rows .hydra-sortable-row .race-extra{grid-column:1/-1}}
