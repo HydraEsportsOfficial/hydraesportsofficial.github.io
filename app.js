@@ -135,13 +135,20 @@ function calendarAttendancePanel(r){
  const list=drivers.map(d=>{const state=statuses.get(String(d.id))||'pending';return `<div><span>${esc(d.gamertag)}</span><span class="att-state ${state}">${state==='present'?'Presente':state==='absent'?'Assente':'In attesa'}</span></div>`}).join('');
  return `<article class="calendar-result-panel calendar-att-panel" data-att-race="${r.id}"><div class="calendar-result-head"><h4>LEGA ${esc(r.league)} · PRESENZE</h4><span>${esc(calendarDate(r.race_date))}</span></div><p class="muted">${closed?'Conferme chiuse':'Conferme aperte'} · Scadenza: ${attDeadline(r)?esc(italyDate(attDeadline(r))):'ore 18:00 del giorno della gara (Italia)'}</p><label class="field">Il tuo nickname<select class="calendar-att-driver"><option value="">Seleziona il tuo nickname</option>${opts}</select></label><div class="attendance-actions"><button type="button" class="attendance-choice calendar-att-yes" ${closed?'disabled':''}>✓ Presente</button><button type="button" class="attendance-choice calendar-att-no" ${closed?'disabled':''}>✕ Assente</button></div><p class="muted calendar-att-current">Seleziona il nickname per vedere la tua risposta.</p><p class="calendar-att-message" role="status"></p><p class="muted small">Il nickname non verifica l'identità: non selezionare quello di altri piloti.</p><div class="attendance-counts"><div><b>${present}</b><small>Presenti</small></div><div><b>${absent}</b><small>Assenti</small></div><div><b>${drivers.length-present-absent}</b><small>In attesa</small></div></div><div class="attendance-list">${list}</div></article>`;
 }
+function setAttendanceChoiceState(yes,no,response){
+ if(!yes||!no)return;
+ yes.classList.toggle('is-selected-present',response==='present');
+ no.classList.toggle('is-selected-absent',response==='absent');
+ yes.setAttribute('aria-pressed',String(response==='present'));
+ no.setAttribute('aria-pressed',String(response==='absent'));
+}
 function bindCalendarAttendance(){
  document.querySelectorAll('.calendar-att-panel').forEach(panel=>{
   const race=(data.hydra_races||[]).find(r=>String(r.id)===panel.dataset.attRace);
   const select=panel.querySelector('.calendar-att-driver');
   const message=panel.querySelector('.calendar-att-message');
-  const update=()=>{const entry=(data.hydra_attendance||[]).find(x=>String(x.race_id)===String(race.id)&&String(x.driver_id)===select.value);panel.querySelector('.calendar-att-current').textContent=select.value?'Risposta attuale: '+(entry?.response==='present'?'Presente':entry?.response==='absent'?'Assente':'In attesa'):'Seleziona il nickname per confermare.'};
-  select.onchange=update;
+  const update=()=>{const entry=(data.hydra_attendance||[]).find(x=>String(x.race_id)===String(race.id)&&String(x.driver_id)===select.value);panel.querySelector('.calendar-att-current').textContent=select.value?'Risposta attuale: '+(entry?.response==='present'?'Presente':entry?.response==='absent'?'Assente':'In attesa'):'Seleziona il nickname per confermare.';setAttendanceChoiceState(panel.querySelector('.calendar-att-yes'),panel.querySelector('.calendar-att-no'),select.value?entry?.response:null)};
+  select.onchange=update;update();
   for(const [cls,response] of [['.calendar-att-yes','present'],['.calendar-att-no','absent']])panel.querySelector(cls).onclick=async()=>{
    const driverId=Number(select.value);if(!driverId){message.textContent='Seleziona prima il tuo nickname.';return}
    if(deadlinePassed(race)){message.textContent='Termine per le conferme scaduto.';return}
@@ -181,6 +188,7 @@ function renderCalendarModal(){
  $('#calendar-modal-yes').disabled=$('#calendar-modal-no').disabled=closed;
  const response=(data.hydra_attendance||[]).find(a=>race&&String(a.race_id)===String(race.id)&&String(a.driver_id)===driver.value)?.response;
  $('#calendar-modal-current').textContent=driver.value?'Risposta attuale: '+(response==='present'?'Presente':response==='absent'?'Assente':'In attesa'):'Seleziona il tuo nickname per confermare.';
+ setAttendanceChoiceState($('#calendar-modal-yes'),$('#calendar-modal-no'),driver.value?response:null);
 }
 $('#calendar-modal-league').addEventListener('change',()=>{$('#calendar-modal-driver').value='';$('#calendar-modal-message').textContent='';renderCalendarModal()});
 $('#calendar-modal-driver').addEventListener('change',renderCalendarModal);
@@ -245,13 +253,14 @@ function renderAttendance(){
  const race=attendanceRace(),drivers=(data.hydra_drivers||[]).filter(d=>d.league===attLeague.value).sort((a,b)=>a.gamertag.localeCompare(b.gamertag));
  const old=attDriver.value;attDriver.innerHTML='<option value="">Seleziona il tuo nickname</option>'+drivers.map(d=>`<option value="${d.id}">${esc(d.gamertag)} · ${esc(nameOf('hydra_teams',d.team_id))}</option>`).join('');if(drivers.some(d=>String(d.id)===old))attDriver.value=old;
  const raceEl=$('#attendance-race'),counts=$('#attendance-counts'),list=$('#attendance-list');
- if(!race){raceEl.innerHTML='<p class="empty">Nessuna prossima gara programmata per questa lega. La Direzione Gara deve inserire la data nel calendario.</p>';counts.innerHTML='';list.innerHTML='';attDriver.disabled=true;$('#attendance-yes').disabled=$('#attendance-no').disabled=true;$('#attendance-current').textContent='';return}
+ if(!race){raceEl.innerHTML='<p class="empty">Nessuna prossima gara programmata per questa lega. La Direzione Gara deve inserire la data nel calendario.</p>';counts.innerHTML='';list.innerHTML='';attDriver.disabled=true;$('#attendance-yes').disabled=$('#attendance-no').disabled=true;$('#attendance-current').textContent='';setAttendanceChoiceState($('#attendance-yes'),$('#attendance-no'),null);return}
  const closed=deadlinePassed(race);raceEl.innerHTML=`<strong>Round ${race.round_number} · ${esc(race.circuit)}</strong><p>${esc(race.race_date)} · Lega ${esc(race.league)}</p><p class="muted">Scadenza: ${attDeadline(race)?esc(italyDate(attDeadline(race))):'ore 18:00 del giorno della gara (Italia)'} · ${closed?'Conferme chiuse':'Conferme aperte'}</p>`;
  attDriver.disabled=false;$('#attendance-yes').disabled=$('#attendance-no').disabled=closed;
  const rows=(data.hydra_attendance||[]).filter(x=>x.race_id===race.id);const present=rows.filter(x=>x.response==='present').length,absent=rows.filter(x=>x.response==='absent').length;
  counts.innerHTML=`<div><b>${present}</b><small>Presenti</small></div><div><b>${absent}</b><small>Assenti</small></div><div><b>${Math.max(0,drivers.length-present-absent)}</b><small>In attesa</small></div>`;
  list.innerHTML=drivers.map(d=>{const r=rows.find(x=>x.driver_id===d.id);return `<div><span>${esc(d.gamertag)}</span><span class="att-state ${r?.response||'pending'}">${r?.response==='present'?'Presente':r?.response==='absent'?'Assente':'In attesa'}</span></div>`}).join('');
  const mine=rows.find(x=>String(x.driver_id)===attDriver.value);$('#attendance-current').textContent=attDriver.value?`Risposta attuale: ${mine?.response==='present'?'Presente':mine?.response==='absent'?'Assente':'In attesa'}`:'Seleziona il tuo nickname per confermare.';
+ setAttendanceChoiceState($('#attendance-yes'),$('#attendance-no'),attDriver.value?mine?.response:null);
 }
 async function saveAttendance(response){const race=attendanceRace(),driver=Number(attDriver.value);if(!race||!driver)return $('#attendance-message').textContent='Seleziona prima il tuo nickname.';if(deadlinePassed(race))return $('#attendance-message').textContent='Termine per le conferme scaduto.';
  try{await request('/rest/v1/hydra_attendance?on_conflict=race_id,driver_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({race_id:race.id,driver_id:driver,response})});$('#attendance-message').textContent='Risposta salvata correttamente.';data.hydra_attendance=await request('/rest/v1/hydra_attendance?select=*');renderAttendance()}catch(e){$('#attendance-message').textContent='Salvataggio non riuscito: '+e.message}}
