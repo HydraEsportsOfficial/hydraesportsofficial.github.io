@@ -520,3 +520,15 @@ body {
 .attendance-choice.is-selected-absent,.attendance-choice.is-selected-absent:hover:not(:disabled){background:#752027;color:#fff3f3;border:2px solid #ff7474;box-shadow:0 0 0 1px #ff747455,0 0 18px #ff545450;text-shadow:0 1px 2px #3b0a10}
 .attendance-choice.is-selected-present:disabled,.attendance-choice.is-selected-absent:disabled{opacity:.85}
 @media(prefers-reduced-motion:reduce){.attendance-choice{transition:none}}
+
+/* Public attendance grouped by team, placed below voting */
+#attendance .attendance-layout{display:block;max-width:920px;margin-left:auto;margin-right:auto}
+#attendance .attendance-panel{width:100%;box-sizing:border-box}
+.attendance-summary-block{margin-top:26px;padding-top:22px;border-top:1px solid #b69a6055}
+.attendance-summary-block h3{margin:0 0 8px;color:#f0d79b}
+.attendance-summary-block .attendance-list{max-height:none;overflow:visible}
+.attendance-team-group{margin:14px 0 18px;border:1px solid #b69a6040;border-radius:10px;overflow:hidden;background:#0c1b2d}
+.attendance-team-group h4{margin:0;padding:12px 15px;background:#172a43;color:#eacb87;font-size:15px;border-bottom:1px solid #b69a6040}
+.attendance-team-group .attendance-driver-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 15px;border-bottom:1px solid #ffffff12}
+.attendance-team-group .attendance-driver-row:last-child{border-bottom:0}
+.attendance-team-group .att-state{flex-shrink:0}
