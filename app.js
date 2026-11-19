@@ -130,7 +130,7 @@ function attendanceGroupedList(drivers,rows){
  const groups=teams.map(t=>({name:t.name,drivers:drivers.filter(d=>String(d.team_id)===String(t.id))})).filter(g=>g.drivers.length);
  const wild=drivers.filter(d=>!teams.some(t=>String(t.id)===String(d.team_id)));
  if(wild.length)groups.push({name:'Piloti WILD',drivers:wild});
- return groups.map(g=>'<section class="attendance-team-group"><h4>'+esc(g.name)+'</h4>'+g.drivers.sort((a,b)=>a.gamertag.localeCompare(b.gamertag,'it')).map(d=>{const state=statuses.get(String(d.id))||'pending';return '<div class="attendance-driver-row"><span>'+esc(d.gamertag)+'</span><span class="att-state '+state+'">'+(state==='present'?'✓ Presente':state==='absent'?'✕ Assente':'○ In attesa')+'</span></div>'}).join('')+'</section>').join('');
+ return groups.map(g=>'<section class="attendance-team-group'+(g.name==='Piloti WILD'?' attendance-wild-group':'')+'"><h4>'+esc(g.name)+'</h4>'+g.drivers.sort((a,b)=>a.gamertag.localeCompare(b.gamertag,'it')).map(d=>{const state=statuses.get(String(d.id))||'pending';return '<div class="attendance-driver-row"><span>'+esc(d.gamertag)+'</span><span class="att-state '+state+'">'+(state==='present'?'✓ Presente':state==='absent'?'✕ Assente':'○ In attesa')+'</span></div>'}).join('')+'</section>').join('');
 }
 function calendarAttendancePanel(r){
  const drivers=(data.hydra_drivers||[]).filter(d=>!d.archived&&d.league===r.league).sort((a,b)=>a.gamertag.localeCompare(b.gamertag,'it'));
