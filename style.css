@@ -643,3 +643,10 @@ body {
 .attendance-team-heading>span:last-child{min-width:0;overflow-wrap:anywhere}
 .attendance-team-wild-icon{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex:0 0 34px;border:1px solid #d5b57188;border-radius:8px;color:#e9c780;font-weight:900;font-size:18px}
 @media(max-width:699px){.attendance-team-logo{width:42px;height:28px;flex-basis:42px}.attendance-team-group .attendance-team-heading{gap:9px}}
+
+/* Match the monochrome team crests used in the Home standings */
+.attendance-team-logo{filter:brightness(0) invert(1)}
+.attendance-team-heading:has(.attendance-team-logo[src*="ferrari"]) .attendance-team-logo,
+.attendance-team-heading:has(.attendance-team-logo[src*="redbullracing"]) .attendance-team-logo,
+.attendance-team-heading:has(.attendance-team-logo[src*="cadillac"]) .attendance-team-logo{filter:grayscale(1) brightness(1.35) contrast(1.25)}
+.attendance-team-heading:has(.attendance-team-logo[src*="cadillac"]) .attendance-team-logo{filter:grayscale(1) brightness(0) invert(1)}
