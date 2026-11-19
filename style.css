@@ -532,3 +532,10 @@ body {
 .attendance-team-group .attendance-driver-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 15px;border-bottom:1px solid #ffffff12}
 .attendance-team-group .attendance-driver-row:last-child{border-bottom:0}
 .attendance-team-group .att-state{flex-shrink:0}
+
+/* Attendance summary in the calendar confirmation dialog */
+.attendance-modal-dialog{max-height:min(88vh,900px);overflow-y:auto;overscroll-behavior:contain}
+.calendar-modal-summary{margin-top:22px}
+.calendar-modal-summary .attendance-list{max-height:360px;overflow-y:auto;padding-right:3px}
+.calendar-modal-summary .attendance-team-group{margin:12px 0}
+@media(max-width:600px){.attendance-modal-dialog{max-height:90dvh}.calendar-modal-summary .attendance-list{max-height:300px}}
