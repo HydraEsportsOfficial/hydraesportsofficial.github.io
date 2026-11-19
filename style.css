@@ -598,3 +598,41 @@ body {
  #calendar-attendance-overlay .calendar-modal-summary .attendance-counts>div{padding:13px 3px}
  #calendar-attendance-overlay .calendar-modal-summary .attendance-counts b{font-size:25px}
 }
+
+/* Race Center refinements: centered vote form and full-width WILD roster */
+@media(min-width:700px){
+ #calendar-attendance-overlay .attendance-modal-dialog>:not(.profile-close):not(.calendar-modal-summary){
+  width:100%;
+  max-width:620px;
+  margin-left:auto;
+  margin-right:auto;
+  box-sizing:border-box;
+ }
+ #calendar-attendance-overlay .attendance-modal-dialog>.eyebrow,
+ #calendar-attendance-overlay .attendance-modal-dialog>#calendar-modal-title,
+ #calendar-attendance-overlay .attendance-modal-dialog>#calendar-modal-race{
+  text-align:center;
+ }
+ #calendar-attendance-overlay .attendance-modal-dialog>.attendance-actions{max-width:620px}
+}
+#calendar-attendance-overlay .calendar-modal-summary .attendance-team-group.attendance-wild-group{
+ grid-column:1/-1;
+}
+#calendar-attendance-overlay .calendar-modal-summary .attendance-wild-group{
+ display:grid;
+ grid-template-columns:repeat(2,minmax(0,1fr));
+ align-content:start;
+}
+#calendar-attendance-overlay .calendar-modal-summary .attendance-wild-group>h4{
+ grid-column:1/-1;
+}
+#calendar-attendance-overlay .calendar-modal-summary .attendance-wild-group>.attendance-driver-row{
+ border-bottom:1px solid #ffffff12;
+}
+#calendar-attendance-overlay .calendar-modal-summary .attendance-wild-group>.attendance-driver-row:nth-child(even){
+ border-right:1px solid #ffffff12;
+}
+@media(max-width:699px){
+ #calendar-attendance-overlay .calendar-modal-summary .attendance-wild-group{grid-template-columns:1fr}
+ #calendar-attendance-overlay .calendar-modal-summary .attendance-wild-group>.attendance-driver-row:nth-child(even){border-right:0}
+}
