@@ -120,11 +120,42 @@
     } catch(err){msg.textContent='Errore: '+err.message;}
     finally{btn.disabled=false;}
   });
+
+  // Owner-only visual preview. The preview files are public repository assets;
+  // this is not server-side access control and is intended only for UI testing.
+  const testButton=document.createElement('button');
+  testButton.type='button';
+  testButton.className='btn';
+  testButton.textContent='◈ Ambiente di test';
+  testButton.hidden=true;
+  testButton.style.cssText='margin:12px 0;border:1px solid #c5a46d;color:#e9c675';
+  adminBox.insertBefore(testButton,adminBox.firstChild);
+  const testOverlay=document.createElement('div');
+  testOverlay.hidden=true;
+  testOverlay.style.cssText='position:fixed;inset:0;z-index:2147483000;background:#071323;display:none;flex-direction:column';
+  testOverlay.innerHTML='<div style="display:flex;align-items:center;gap:12px;padding:10px 16px;background:#102c59;color:#e9c675;font:600 14px system-ui"><strong style="flex:1">HYDRA · AMBIENTE TEST</strong><span>Anteprima grafica · sola lettura</span><button type="button" style="background:#c5a46d;color:#071323;border:0;padding:9px 14px;border-radius:7px;font-weight:700">✕ Chiudi</button></div><iframe title="Anteprima Hydra Web TEST" sandbox="allow-scripts allow-forms allow-same-origin" style="flex:1;width:100%;border:0;background:#071323"></iframe>';
+  document.body.appendChild(testOverlay);
+  const testFrame=testOverlay.querySelector('iframe');
+  const testClose=testOverlay.querySelector('button');
+  const testRoot='https://cdn.jsdelivr.net/gh/HydraEsportsOfficial/hydraesportsofficial.github.io@hydra-test/';
+  testClose.onclick=()=>{testOverlay.hidden=true;testOverlay.style.display='none';testFrame.removeAttribute('srcdoc');};
+  testButton.onclick=async()=>{
+    testOverlay.hidden=false;testOverlay.style.display='flex';
+    testFrame.srcdoc='<p style="font:16px system-ui;color:white;padding:24px">Caricamento anteprima…</p>';
+    try{
+      const response=await fetch(testRoot+'index.html',{cache:'no-store'});
+      if(!response.ok)throw Error('HTTP '+response.status);
+      let html=await response.text();
+      html=html.replace(/<head([^>]*)>/i,'<head$1><base href="'+testRoot+'">');
+      testFrame.srcdoc=html;
+    }catch(err){testFrame.srcdoc='<p style="font:16px system-ui;color:white;padding:24px">Anteprima non disponibile: '+String(err.message).replace(/[&<>"']/g,'')+'</p>';}
+  };
   const previousCheck=checkAdmin;
   checkAdmin=async function(...args){
     await previousCheck(...args);
     panel.hidden=true;
     accountTab.hidden=true;
+    testButton.hidden=true;
     if (!token) return;
     try {
       const user=await request('/auth/v1/user');
@@ -132,6 +163,7 @@
       const display=email===PRIMARY_EMAIL?'BlazeRevolution':email.endsWith('@accounts.hydra.invalid')?(user.app_metadata?.hydra_username || email.split('@')[0]):'Amministratore';
       document.getElementById('admin-welcome').textContent='Accesso amministratore attivo · '+display;
       const isOwner=email===PRIMARY_EMAIL;
+      testButton.hidden=!isOwner;
       accountTab.hidden=!isOwner;
       panel.hidden=!isOwner;
       if (isOwner) await refresh();
