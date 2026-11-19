@@ -539,3 +539,62 @@ body {
 .calendar-modal-summary .attendance-list{max-height:360px;overflow-y:auto;padding-right:3px}
 .calendar-modal-summary .attendance-team-group{margin:12px 0}
 @media(max-width:600px){.attendance-modal-dialog{max-height:90dvh}.calendar-modal-summary .attendance-list{max-height:300px}}
+
+/* Race Center attendance dialog: spacious cards, one unobtrusive scroll area */
+#calendar-attendance-overlay .attendance-modal-dialog{
+ width:min(920px,calc(100vw - 36px));
+ max-width:920px;
+ max-height:min(90dvh,960px);
+ padding:clamp(20px,3vw,34px);
+ overflow-x:hidden;
+ overflow-y:auto;
+ scrollbar-width:none;
+ -ms-overflow-style:none;
+}
+#calendar-attendance-overlay .attendance-modal-dialog::-webkit-scrollbar{display:none}
+#calendar-attendance-overlay .calendar-modal-summary{margin-top:26px;padding-top:24px}
+#calendar-attendance-overlay .calendar-modal-summary .attendance-counts{gap:14px;margin:18px 0 22px}
+#calendar-attendance-overlay .calendar-modal-summary .attendance-counts>div{padding:18px 10px;background:#162b45;border:1px solid #c5a46d44;border-radius:12px}
+#calendar-attendance-overlay .calendar-modal-summary .attendance-counts b{font-size:30px}
+#calendar-attendance-overlay .calendar-modal-summary .attendance-list{
+ display:grid;
+ grid-template-columns:repeat(2,minmax(0,1fr));
+ align-items:start;
+ gap:14px;
+ max-height:none;
+ overflow:visible;
+ padding:0;
+ margin-top:12px;
+}
+#calendar-attendance-overlay .calendar-modal-summary .attendance-team-group{
+ margin:0;
+ border:1px solid #c5a46d55;
+ border-radius:12px;
+ background:linear-gradient(155deg,#142840,#0b192c);
+ box-shadow:0 6px 18px #0002;
+ min-width:0;
+}
+#calendar-attendance-overlay .calendar-modal-summary .attendance-team-group h4{
+ background:#1b314d;
+ padding:14px 16px;
+ font-size:15px;
+ line-height:1.35;
+}
+#calendar-attendance-overlay .calendar-modal-summary .attendance-driver-row{padding:12px 14px;min-width:0}
+#calendar-attendance-overlay .calendar-modal-summary .attendance-driver-row>span:first-child{overflow-wrap:anywhere;min-width:0}
+#calendar-attendance-overlay .calendar-modal-summary .att-state{font-weight:700}
+@media(min-width:700px){
+ #calendar-attendance-overlay .attendance-modal-dialog>.field,
+ #calendar-attendance-overlay .attendance-modal-dialog>.attendance-actions,
+ #calendar-attendance-overlay .attendance-modal-dialog>#calendar-modal-race,
+ #calendar-attendance-overlay .attendance-modal-dialog>#calendar-modal-deadline,
+ #calendar-attendance-overlay .attendance-modal-dialog>#calendar-modal-current,
+ #calendar-attendance-overlay .attendance-modal-dialog>#calendar-modal-message{max-width:620px}
+}
+@media(max-width:699px){
+ #calendar-attendance-overlay .attendance-modal-dialog{width:calc(100vw - 20px);max-height:94dvh;padding:20px 16px}
+ #calendar-attendance-overlay .calendar-modal-summary .attendance-list{grid-template-columns:1fr;gap:11px}
+ #calendar-attendance-overlay .calendar-modal-summary .attendance-counts{gap:7px}
+ #calendar-attendance-overlay .calendar-modal-summary .attendance-counts>div{padding:13px 3px}
+ #calendar-attendance-overlay .calendar-modal-summary .attendance-counts b{font-size:25px}
+}
