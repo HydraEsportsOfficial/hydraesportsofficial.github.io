@@ -197,6 +197,12 @@ function renderCalendarModal(){
  const response=(data.hydra_attendance||[]).find(a=>race&&String(a.race_id)===String(race.id)&&String(a.driver_id)===driver.value)?.response;
  $('#calendar-modal-current').textContent=driver.value?'Risposta attuale: '+(response==='present'?'Presente':response==='absent'?'Assente':'In attesa'):'Seleziona il tuo nickname per confermare.';
  setAttendanceChoiceState($('#calendar-modal-yes'),$('#calendar-modal-no'),driver.value?response:null);
+ const rows=race?(data.hydra_attendance||[]).filter(x=>String(x.race_id)===String(race.id)):[];
+ const statuses=new Map(rows.map(x=>[String(x.driver_id),x.response]));
+ const present=drivers.filter(d=>statuses.get(String(d.id))==='present').length;
+ const absent=drivers.filter(d=>statuses.get(String(d.id))==='absent').length;
+ $('#calendar-modal-counts').innerHTML=race?`<div><b>${present}</b><small>Presenti</small></div><div><b>${absent}</b><small>Assenti</small></div><div><b>${drivers.length-present-absent}</b><small>In attesa</small></div>`:'';
+ $('#calendar-modal-list').innerHTML=race?attendanceGroupedList(drivers,rows):'<p class="muted">Nessuna gara selezionata.</p>';
 }
 $('#calendar-modal-league').addEventListener('change',()=>{$('#calendar-modal-driver').value='';$('#calendar-modal-message').textContent='';renderCalendarModal()});
 $('#calendar-modal-driver').addEventListener('change',renderCalendarModal);
