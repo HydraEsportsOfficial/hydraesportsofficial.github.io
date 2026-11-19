@@ -636,3 +636,10 @@ body {
  #calendar-attendance-overlay .calendar-modal-summary .attendance-wild-group{grid-template-columns:1fr}
  #calendar-attendance-overlay .calendar-modal-summary .attendance-wild-group>.attendance-driver-row:nth-child(even){border-right:0}
 }
+
+/* Team crests beside attendance group names */
+.attendance-team-group .attendance-team-heading{display:flex;align-items:center;gap:12px;min-height:54px;box-sizing:border-box}
+.attendance-team-logo{display:block;width:52px;height:32px;object-fit:contain;flex:0 0 52px}
+.attendance-team-heading>span:last-child{min-width:0;overflow-wrap:anywhere}
+.attendance-team-wild-icon{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex:0 0 34px;border:1px solid #d5b57188;border-radius:8px;color:#e9c780;font-weight:900;font-size:18px}
+@media(max-width:699px){.attendance-team-logo{width:42px;height:28px;flex-basis:42px}.attendance-team-group .attendance-team-heading{gap:9px}}
