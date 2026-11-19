@@ -513,3 +513,10 @@ body {
 .admin-tab-panel[hidden]{display:none!important}
 .admin-tab-panel>.panel{margin-top:0;margin-bottom:18px}
 @media(max-width:850px){.admin-shell{display:block}.admin-section-nav{position:static;display:flex;flex-direction:row;overflow-x:auto;margin-bottom:16px;scrollbar-width:thin}.admin-section-nav button{flex:0 0 auto;white-space:nowrap}}
+
+/* Attendance: persistent visual confirmation after successful save */
+.attendance-choice{transition:background-color .2s ease,border-color .2s ease,box-shadow .2s ease,color .2s ease}
+.attendance-choice.is-selected-present,.attendance-choice.is-selected-present:hover:not(:disabled){background:#125b35;color:#f0fff5;border:2px solid #4ee28d;box-shadow:0 0 0 1px #4ee28d55,0 0 18px #36dc7950;text-shadow:0 1px 2px #07391b}
+.attendance-choice.is-selected-absent,.attendance-choice.is-selected-absent:hover:not(:disabled){background:#752027;color:#fff3f3;border:2px solid #ff7474;box-shadow:0 0 0 1px #ff747455,0 0 18px #ff545450;text-shadow:0 1px 2px #3b0a10}
+.attendance-choice.is-selected-present:disabled,.attendance-choice.is-selected-absent:disabled{opacity:.85}
+@media(prefers-reduced-motion:reduce){.attendance-choice{transition:none}}
