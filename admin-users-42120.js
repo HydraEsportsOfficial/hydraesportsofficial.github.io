@@ -137,7 +137,7 @@
   document.body.appendChild(testOverlay);
   const testFrame=testOverlay.querySelector('iframe');
   const testClose=testOverlay.querySelector('button');
-  const testRoot='https://cdn.jsdelivr.net/gh/HydraEsportsOfficial/hydraesportsofficial.github.io@hydra-test/';
+  const testRoot='https://cdn.jsdelivr.net/gh/HydraEsportsOfficial/hydraesportsofficial.github.io@d14e73e99c68d0c6d111ef8c655216b552aa92ae/';
   testClose.onclick=()=>{testOverlay.hidden=true;testOverlay.style.display='none';testFrame.removeAttribute('srcdoc');};
   testButton.onclick=async()=>{
     testOverlay.hidden=false;testOverlay.style.display='flex';
