@@ -5,8 +5,20 @@ if(!raceSelect||!root)return;
 const section=document.createElement('section');section.className='panel';section.style.cssText='margin:18px 0;padding:18px;border:1px solid #c5a46d;border-radius:12px';
 section.innerHTML='<h3>⚖️ Registro reclami e verdetti</h3><p class="muted small">Ogni decisione viene salvata nel registro riservato agli amministratori. Il PDF riporta anche i reclami respinti. Le sanzioni sono applicate ai risultati solo tramite il pulsante dedicato, prima del salvataggio ufficiale.</p><div id="hydra-verdict-list"></div><div class="actions"><button type="button" id="hydra-verdict-add">+ Nuovo reclamo</button><button type="button" id="hydra-verdict-save">Salva verdetti</button><button type="button" id="hydra-verdict-apply">Applica sanzioni ai risultati</button><button type="button" id="hydra-verdict-pdf" class="gold">Genera PDF ufficiale</button></div><p id="hydra-verdict-message" role="status"></p>';
 const anchor=document.getElementById('hydra-stewards-recalc')?.closest('.panel')||root;
-anchor.parentNode.insertBefore(section,anchor.nextSibling);
+anchor.parentNode.insertBefore(section,anchor);
 const list=section.querySelector('#hydra-verdict-list'),msg=section.querySelector('#hydra-verdict-message');
+// Arrange controls: draft tools, verdict register, stewards, then official actions.
+const editorActions=document.getElementById('admin-add-race-row')?.closest('.actions');
+const officialSave=document.getElementById('admin-save-race');
+const pdfButton=section.querySelector('#hydra-verdict-pdf');
+if(editorActions&&officialSave&&pdfButton){
+ const finalActions=document.createElement('div');finalActions.className='actions';finalActions.id='hydra-final-actions';
+ officialSave.parentNode.removeChild(officialSave);pdfButton.parentNode.removeChild(pdfButton);
+ finalActions.append(officialSave,pdfButton);
+ const stewards=document.getElementById('hydra-stewards-recalc')?.closest('.panel');
+ if(stewards)stewards.insertAdjacentElement('afterend',finalActions);else section.insertAdjacentElement('afterend',finalActions);
+}
+
 let verdicts=[],serial=0,dirty=false,loadedRace='';
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const drivers=()=> (data.hydra_drivers||[]).filter(d=>d.league===(data.hydra_races||[]).find(r=>String(r.id)===raceSelect.value)?.league);
