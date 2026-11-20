@@ -12,6 +12,8 @@ const editorActions=document.getElementById('admin-add-race-row')?.closest('.act
 const officialSave=document.getElementById('admin-save-race');
 const pdfButton=section.querySelector('#hydra-verdict-pdf');
 if(editorActions&&officialSave&&pdfButton){
+ // Place the draft action row immediately after the race cards, before the verdict panel.
+ root.insertAdjacentElement('afterend',editorActions);
  const finalActions=document.createElement('div');finalActions.className='actions';finalActions.id='hydra-final-actions';
  officialSave.parentNode.removeChild(officialSave);pdfButton.parentNode.removeChild(pdfButton);
  finalActions.append(officialSave,pdfButton);
