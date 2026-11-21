@@ -78,7 +78,7 @@ async function pdf(){
  const originalEntries=classified.map((r,i)=>{const final=parseSeconds(r.time_display);const absolute=/^\d+:[0-5]\d:[0-5]\d\.\d{3}$/.test(String(r.time_display||''));return{r,i,total:final===null?null:(absolute?final:(baseFinal===null?null:baseFinal+final))-Number(r.penalty_seconds||0)}});
  const timedEntries=originalEntries.filter(e=>e.total!==null&&Number.isFinite(e.total));
  const untimedEntries=originalEntries.filter(e=>e.total===null||!Number.isFinite(e.total));
- const canCompare=baseFinal!==null&&timedEntries.length>0&&untimedEntries.every(e=>/^\\+?\\d+\\s+gir(?:o|i)$/i.test(String(e.r.time_display||'').trim())&&Number(e.r.finishing_position)>Math.max(...timedEntries.map(t=>Number(t.r.finishing_position))));
+ const canCompare=baseFinal!==null&&timedEntries.length>0&&untimedEntries.every(e=>/^\+?\d+\s+gir(?:o|i)$/i.test(String(e.r.time_display||'').trim())&&Number(e.r.finishing_position)>Math.max(...timedEntries.map(t=>Number(t.r.finishing_position))));
  if(canCompare){timedEntries.sort((a,b)=>a.total-b.total||Number(a.r.finishing_position)-Number(b.r.finishing_position));timedEntries.forEach((e,i)=>originalRank.set(String(e.r.driver_id),i+1))}
  const changes=classified.map(r=>{const from=originalRank.get(String(r.driver_id)),to=Number(r.finishing_position);return{r,from,to,diff:from&&to?from-to:null}}).filter(x=>x.diff!==null&&x.diff!==0);
  const affected=new Set(verdicts.filter(v=>v.verdict==='penalty'&&(Number(v.penalty_seconds)>0||Number(v.penalty_coin)>0)).map(v=>String(v.accused_driver_id)));
