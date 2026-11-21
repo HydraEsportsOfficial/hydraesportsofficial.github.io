@@ -50,5 +50,22 @@ doc.setFontSize(8);doc.setTextColor(95,95,95);const total=doc.getNumberOfPages()
 const pdfStatus=document.createElement('div');pdfStatus.id='hydra-pdf-download-status';pdfStatus.setAttribute('role','status');pdfStatus.style.cssText='margin:10px 0;color:#e8d5a2;font-weight:600';(document.getElementById('hydra-final-actions')||section).insertAdjacentElement('afterend',pdfStatus);
 pdfDiagnostic.textContent='PDF: generatore pronto. Premi il pulsante dorato per creare il documento.';
 let lastPdfUrl=null;
-document.addEventListener('click',(event)=>{if(!event.target.closest('#hydra-verdict-pdf'))return;event.preventDefault();event.stopPropagation();pdfStatus.textContent='Preparazione PDF in corso...';pdfDiagnostic.textContent='PDF: preparazione in corso...';try{const result=pdf();if(lastPdfUrl)URL.revokeObjectURL(lastPdfUrl);lastPdfUrl=URL.createObjectURL(result.blob);pdfStatus.replaceChildren();const link=document.createElement('a');link.href=lastPdfUrl;link.download=result.filename;link.textContent='⬇ Scarica PDF ufficiale ('+result.filename+')';link.style.cssText='color:#f0ca75;text-decoration:underline;font-weight:700;display:inline-block;padding:8px 0';pdfStatus.append('PDF pronto. ',link);pdfDiagnostic.textContent='PDF creato. Il collegamento per scaricarlo è sotto i pulsanti.';msg.textContent='PDF pronto per il download. Usa il collegamento sotto i pulsanti ufficiali.';link.click()}catch(e){pdfStatus.textContent='PDF non generato: '+e.message;pdfDiagnostic.textContent='PDF non generato: '+e.message;msg.textContent='PDF non generato: '+e.message;console.error('HYDRA PDF generation',e)}},true);
+let pdfLoading=null;
+async function ensurePdfLibrary(){
+ if(window.jspdf?.jsPDF)return;
+ if(pdfLoading)return pdfLoading;
+ pdfLoading=(async()=>{
+  const sources=['https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js','https://unpkg.com/jspdf@2.5.2/dist/jspdf.umd.min.js','https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js'];
+  for(let i=0;i<sources.length;i++){
+   pdfDiagnostic.textContent='PDF: caricamento generatore ('+(i+1)+'/'+sources.length+')...';
+   try{
+    await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=sources[i];script.async=true;const timeout=setTimeout(()=>{script.remove();reject(new Error('Tempo scaduto'))},9000);script.onload=()=>{clearTimeout(timeout);resolve()};script.onerror=()=>{clearTimeout(timeout);reject(new Error('Fonte non raggiungibile'))};document.head.appendChild(script)});
+    if(window.jspdf?.jsPDF)return;
+   }catch(e){console.warn('HYDRA PDF source unavailable',sources[i],e)}
+  }
+  throw new Error('Libreria PDF non caricabile dalle fonti disponibili. Controlla blocchi del browser o della rete.');
+ })();
+ try{await pdfLoading}finally{pdfLoading=null}
+}
+document.addEventListener('click',async(event)=>{if(!event.target.closest('#hydra-verdict-pdf'))return;event.preventDefault();event.stopPropagation();pdfStatus.textContent='Preparazione PDF in corso...';pdfDiagnostic.textContent='PDF: preparazione in corso...';try{await ensurePdfLibrary();const result=pdf();if(lastPdfUrl)URL.revokeObjectURL(lastPdfUrl);lastPdfUrl=URL.createObjectURL(result.blob);pdfStatus.replaceChildren();const link=document.createElement('a');link.href=lastPdfUrl;link.download=result.filename;link.textContent='⬇ Scarica PDF ufficiale ('+result.filename+')';link.style.cssText='color:#f0ca75;text-decoration:underline;font-weight:700;display:inline-block;padding:8px 0';pdfStatus.append('PDF pronto. ',link);pdfDiagnostic.textContent='PDF creato. Il collegamento per scaricarlo è sotto i pulsanti.';msg.textContent='PDF pronto per il download. Usa il collegamento sotto i pulsanti ufficiali.';link.click()}catch(e){pdfStatus.textContent='PDF non generato: '+e.message;pdfDiagnostic.textContent='PDF non generato: '+e.message;msg.textContent='PDF non generato: '+e.message;console.error('HYDRA PDF generation',e)}},true);
 })();
