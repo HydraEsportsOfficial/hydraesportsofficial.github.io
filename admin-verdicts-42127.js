@@ -69,9 +69,13 @@ async function pdf(){
  const classified=rows.filter(r=>r.status==='classified');
  const originalRank=new Map();
  // The on-track order is reconstructed from game_time_display, never from final adjusted gaps.
- const gameEntries=classified.map((r,i)=>({r,i,raw:String(r.game_time_display||''),sec:parseSeconds(r.game_time_display)}));
- const absolute=gameEntries.find(e=>/^\d+:[0-5]\d:[0-5]\d\.\d{3}$/.test(e.raw)||/^\d+:[0-5]\d\.\d{3}$/.test(e.raw));const canCompare=!!absolute&&gameEntries.every(e=>e.sec!==null);if(canCompare){gameEntries.forEach(e=>{if(e!==absolute)e.sec+=absolute.sec})}
- if(canCompare){gameEntries.sort((a,b)=>a.sec-b.sec||a.i-b.i);gameEntries.forEach((e,i)=>originalRank.set(String(e.r.driver_id),i+1))}
+ // Reconstruct pre-verdict order from final times minus additional steward seconds.
+ // Final absolute winner time + final gaps are sufficient even after reloading official results.
+ const finalWinner=classified.find(r=>Number(r.finishing_position)===1);
+ const baseFinal=parseSeconds(finalWinner?.time_display);
+ const originalEntries=classified.map((r,i)=>{const final=parseSeconds(r.time_display);const absolute=/^\d+:[0-5]\d:[0-5]\d\.\d{3}$/.test(String(r.time_display||''));return{r,i,total:final===null?null:(absolute?final:(baseFinal===null?null:baseFinal+final))-Number(r.penalty_seconds||0)}});
+ const canCompare=baseFinal!==null&&originalEntries.length>0&&originalEntries.every(e=>e.total!==null&&Number.isFinite(e.total));
+ if(canCompare){originalEntries.sort((a,b)=>a.total-b.total||Number(a.r.finishing_position)-Number(b.r.finishing_position));originalEntries.forEach((e,i)=>originalRank.set(String(e.r.driver_id),i+1))}
  const changes=classified.map(r=>{const from=originalRank.get(String(r.driver_id)),to=Number(r.finishing_position);return{r,from,to,diff:from&&to?from-to:null}}).filter(x=>x.diff!==null&&x.diff!==0);
  const affected=new Set(verdicts.filter(v=>v.verdict==='penalty'&&(Number(v.penalty_seconds)>0||Number(v.penalty_coin)>0)).map(v=>String(v.accused_driver_id)));
  if(changes.length){paragraph('VARIAZIONI: '+changes.map(x=>clean(label(x.r.driver_id))+' '+(x.diff>0?'+':'')+x.diff+' pos.').join('  |  '),8.5,gold);y+=2}
@@ -80,7 +84,12 @@ async function pdf(){
  const logoSlugs={'Alpine':'alpine','Aston Martin':'astonmartin','Audi':'audi','Cadillac':'cadillac','Ferrari':'ferrari','Haas':'haas','McLaren':'mclaren','Mercedes':'mercedes','Racing Bulls':'racingbulls','Red Bull':'redbullracing','Williams':'williams'};
  const teamName=r=>(data.hydra_teams||[]).find(t=>String(t.id)===String(r.team_id))?.name||'WILD';
  const teamImages=new Map();
- async function loadTeamLogo(name){const key=Object.keys(logoSlugs).find(k=>name.includes(k));if(!key)return;try{const slug=logoSlugs[key],url='https://media.formula1.com/image/upload/common/f1/2026/'+slug+'/2026'+slug+'logo.svg';const img=new Image();img.crossOrigin='anonymous';await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject;img.src=url});const canvas=document.createElement('canvas');canvas.width=150;canvas.height=80;const ctx=canvas.getContext('2d');const scale=Math.min(138/img.naturalWidth,68/img.naturalHeight);const w=img.naturalWidth*scale,h=img.naturalHeight*scale;ctx.drawImage(img,(150-w)/2,(80-h)/2,w,h);const data=ctx.getImageData(0,0,150,80);for(let i=0;i<data.data.length;i+=4){const a=data.data[i+3];if(a){data.data[i]=255;data.data[i+1]=255;data.data[i+2]=255}}ctx.putImageData(data,0,0);teamImages.set(name,canvas.toDataURL('image/png'))}catch(e){console.warn('HYDRA team logo fallback',name,e)}}
+ async function loadTeamLogo(name){const key=Object.keys(logoSlugs).find(k=>name.includes(k));if(!key)return;const slug=logoSlugs[key],url='https://media.formula1.com/image/upload/common/f1/2026/'+slug+'/2026'+slug+'logo.svg';
+ const canvas=document.createElement('canvas');canvas.width=180;canvas.height=90;const ctx=canvas.getContext('2d');
+ try{const img=new Image();img.crossOrigin='anonymous';await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject;img.src=url});const scale=Math.min(165/img.naturalWidth,78/img.naturalHeight);const w=img.naturalWidth*scale,h=img.naturalHeight*scale;ctx.drawImage(img,(180-w)/2,(90-h)/2,w,h);const pixels=ctx.getImageData(0,0,180,90);for(let i=0;i<pixels.data.length;i+=4){if(pixels.data[i+3]){pixels.data[i]=255;pixels.data[i+1]=255;pixels.data[i+2]=255}}ctx.putImageData(pixels,0,0);teamImages.set(name,canvas.toDataURL('image/png'));return}catch(e){console.warn('HYDRA PDF logo source unavailable',name,e)}
+ // Visible white team wordmark fallback when remote SVG is blocked by CORS.
+ ctx.clearRect(0,0,180,90);ctx.fillStyle='#ffffff';ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='bold 25px Arial';const words=name==='Red Bull'?'RED BULL':name.toUpperCase();ctx.fillText(words,90,45,170);teamImages.set(name,canvas.toDataURL('image/png'));
+ }
  await Promise.all([...new Set(rows.map(teamName))].map(loadTeamLogo));
  const tableRowH=8.1;
  function tableHeader(){doc.setFillColor(...gold);doc.rect(M,y,R-M,9,'F');doc.setFont('helvetica','bold');doc.setFontSize(7.4);doc.setTextColor(...navy);doc.text('POS',M+2,y+6);doc.text('PILOTA',M+16,y+6);doc.text('SCUDERIA',M+66,y+6);doc.text('TEMPO',M+114,y+6);doc.text('PEN.',M+151,y+6);doc.text('VAR.',M+168,y+6);y+=9}
