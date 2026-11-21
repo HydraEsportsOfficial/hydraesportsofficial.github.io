@@ -70,7 +70,7 @@ async function pdf(){
  const originalRank=new Map();
  // The on-track order is reconstructed from game_time_display, never from final adjusted gaps.
  const gameEntries=classified.map((r,i)=>({r,i,raw:String(r.game_time_display||''),sec:parseSeconds(r.game_time_display)}));
- const canCompare=gameEntries.length>0&&gameEntries.every(e=>e.sec!==null);
+ const absolute=gameEntries.find(e=>/^\d+:[0-5]\d:[0-5]\d\.\d{3}$/.test(e.raw)||/^\d+:[0-5]\d\.\d{3}$/.test(e.raw));const canCompare=!!absolute&&gameEntries.every(e=>e.sec!==null);if(canCompare){gameEntries.forEach(e=>{if(e!==absolute)e.sec+=absolute.sec})}
  if(canCompare){gameEntries.sort((a,b)=>a.sec-b.sec||a.i-b.i);gameEntries.forEach((e,i)=>originalRank.set(String(e.r.driver_id),i+1))}
  const changes=classified.map(r=>{const from=originalRank.get(String(r.driver_id)),to=Number(r.finishing_position);return{r,from,to,diff:from&&to?from-to:null}}).filter(x=>x.diff!==null&&x.diff!==0);
  const affected=new Set(verdicts.filter(v=>v.verdict==='penalty'&&(Number(v.penalty_seconds)>0||Number(v.penalty_coin)>0)).map(v=>String(v.accused_driver_id)));
