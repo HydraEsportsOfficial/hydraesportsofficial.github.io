@@ -64,7 +64,9 @@ async function pdf(){
  verdicts.forEach((v,i)=>verdictCard(v,i));
  // The classification always begins on a fresh page, independently of verdict count.
  newPage();heading('CLASSIFICA UFFICIALE POST DECISIONI');
- const rows=editorRows.filter(r=>r.driver_id);
+ const raceTimes=await request('/rest/v1/hydra_result_times?select=driver_id,time_display&race_id=eq.'+encodeURIComponent(race.id));
+ const timeMap=new Map((raceTimes||[]).map(t=>[String(t.driver_id),t.time_display]));
+ const rows=editorRows.filter(r=>r.driver_id).map(r=>({...r,time_display:timeMap.get(String(r.driver_id))||r.time_display||''}));
  const parseSeconds=t=>{const s=String(t||'').trim().replace(/^\+/,'');if(/^\d+:[0-5]\d:[0-5]\d\.\d{3}$/.test(s)){const a=s.split(':').map(Number);return a[0]*3600+a[1]*60+a[2]}if(/^\d+:[0-5]\d\.\d{3}$/.test(s)){const a=s.split(':').map(Number);return a[0]*60+a[1]}if(/^\d+\.\d{3}$/.test(s))return Number(s);return null};
  const classified=rows.filter(r=>r.status==='classified');
  const originalRank=new Map();
