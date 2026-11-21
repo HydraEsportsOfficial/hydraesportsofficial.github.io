@@ -65,11 +65,23 @@ async function pdf(){
  // The classification always begins on a fresh page, independently of verdict count.
  newPage();heading('CLASSIFICA UFFICIALE POST DECISIONI');
  const rows=editorRows.filter(r=>r.driver_id);
+ const parseSeconds=t=>{const s=String(t||'').trim().replace(/^\+/,'');if(/^\d+:[0-5]\d:[0-5]\d\.\d{3}$/.test(s)){const a=s.split(':').map(Number);return a[0]*3600+a[1]*60+a[2]}if(/^\d+:[0-5]\d\.\d{3}$/.test(s)){const a=s.split(':').map(Number);return a[0]*60+a[1]}if(/^\d+\.\d{3}$/.test(s))return Number(s);return null};
+ const classified=rows.filter(r=>r.status==='classified');
+ const originalRank=new Map();
+ // The on-track order is reconstructed from game_time_display, never from final adjusted gaps.
+ const gameEntries=classified.map((r,i)=>({r,i,raw:String(r.game_time_display||''),sec:parseSeconds(r.game_time_display)}));
+ const canCompare=gameEntries.length>0&&gameEntries.every(e=>e.sec!==null);
+ if(canCompare){gameEntries.sort((a,b)=>a.sec-b.sec||a.i-b.i);gameEntries.forEach((e,i)=>originalRank.set(String(e.r.driver_id),i+1))}
+ const changes=classified.map(r=>{const from=originalRank.get(String(r.driver_id)),to=Number(r.finishing_position);return{r,from,to,diff:from&&to?from-to:null}}).filter(x=>x.diff!==null&&x.diff!==0);
+ const affected=new Set(verdicts.filter(v=>v.verdict==='penalty'&&(Number(v.penalty_seconds)>0||Number(v.penalty_coin)>0)).map(v=>String(v.accused_driver_id)));
+ if(changes.length){paragraph('VARIAZIONI: '+changes.map(x=>clean(label(x.r.driver_id))+' '+(x.diff>0?'+':'')+x.diff+' pos.').join('  |  '),8.5,gold);y+=2}
+ else if(canCompare){paragraph('Nessuna variazione di posizione dopo le decisioni dei giudici.',8.5,muted);y+=2}
+ else{paragraph('Variazioni di posizione non verificabili: tempi originali di gioco non disponibili per tutti i classificati.',8.2,muted);y+=2}
  const tableRowH=8.1;
- function tableHeader(){doc.setFillColor(...gold);doc.rect(M,y,R-M,9,'F');doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(...navy);doc.text('POS',M+3,y+6);doc.text('PILOTA',M+19,y+6);doc.text('TEMPO / DISTACCO',M+105,y+6);doc.text('PEN.',M+157,y+6);y+=9}
+ function tableHeader(){doc.setFillColor(...gold);doc.rect(M,y,R-M,9,'F');doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(...navy);doc.text('POS',M+3,y+6);doc.text('PILOTA',M+19,y+6);doc.text('TEMPO / DISTACCO',M+105,y+6);doc.text('PEN.',M+148,y+6);doc.text('VAR.',M+170,y+6);y+=9}
  tableHeader();
- rows.forEach((r,i)=>{if(y+tableRowH>273){newPage();heading('CLASSIFICA  /  CONTINUA');tableHeader()}const pos=r.status==='classified'?String(r.finishing_position||i+1):String(r.status||'DNF').toUpperCase(),time=r.time_display||'--',nameText=clean(label(r.driver_id));doc.setFillColor(...(i%2===0?panel:panelAlt));doc.rect(M,y,R-M,tableRowH,'F');doc.setFont('helvetica',i<3?'bold':'normal');doc.setFontSize(8.6);doc.setTextColor(...(i<3?gold:white));doc.text(clean(pos),M+3,y+5.5);doc.setTextColor(...white);doc.text(nameText.length>39?nameText.slice(0,38)+'...':nameText,M+19,y+5.5);doc.text(clean(time),M+105,y+5.5);doc.text('+'+Number(r.penalty_seconds||0)+'s',M+157,y+5.5);y+=tableRowH});
- y+=9;heading('RIEPILOGO MULTE COIN');
+ rows.forEach((r,i)=>{if(y+tableRowH>273){newPage();heading('CLASSIFICA  /  CONTINUA');tableHeader()}const pos=r.status==='classified'?String(r.finishing_position||i+1):String(r.status||'DNF').toUpperCase(),time=r.time_display||'--',nameText=clean(label(r.driver_id));const change=changes.find(x=>String(x.r.driver_id)===String(r.driver_id));const penalized=affected.has(String(r.driver_id));doc.setFillColor(...(penalized?[40,52,77]:i%2===0?panel:panelAlt));doc.rect(M,y,R-M,tableRowH,'F');if(penalized){doc.setFillColor(...gold);doc.rect(M,y,1.5,tableRowH,'F')}doc.setFont('helvetica',i<3?'bold':'normal');doc.setFontSize(8.6);doc.setTextColor(...(i<3?gold:white));doc.text(clean(pos),M+3,y+5.5);doc.setTextColor(...white);doc.text(nameText.length>39?nameText.slice(0,38)+'...':nameText,M+19,y+5.5);doc.text(clean(time),M+105,y+5.5);doc.text('+'+Number(r.penalty_seconds||0)+'s',M+148,y+5.5);doc.setFont('helvetica','bold');doc.setTextColor(...(change?.diff>0?[113,222,168]:change?.diff<0?[255,154,142]:muted));doc.text(change?(change.diff>0?'UP ':'DOWN ')+Math.abs(change.diff):canCompare?'=':'N/D',M+170,y+5.5);y+=tableRowH});
+ y+=6;paragraph('LEGENDA: UP = posizioni guadagnate; DOWN = posizioni perse; = = invariata. Riga dorata = pilota sanzionato.',8,muted);y+=4;heading('RIEPILOGO MULTE COIN');
  const sums=new Map();verdicts.filter(v=>v.verdict==='penalty'&&Number(v.penalty_coin)>0).forEach(v=>{const row=rows.find(r=>String(r.driver_id)===String(v.accused_driver_id));const team=(data.hydra_teams||[]).find(t=>String(t.id)===String(row?.team_id));const name=team?.name||'Scuderia non assegnata';sums.set(name,(sums.get(name)||0)+Number(v.penalty_coin))});
  if(!sums.size)paragraph('Nessuna multa COIN applicata.',9);else sums.forEach((sum,team)=>paragraph(team+'   -'+sum+' COIN',9));
  const count=doc.getNumberOfPages();for(let p=1;p<=count;p++){doc.setPage(p);doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(...muted);doc.text('HYDRA ESPORTS  |  DIREZIONE GARA',M,288);doc.text('Pagina '+p+' / '+count,R,288,{align:'right'})}
