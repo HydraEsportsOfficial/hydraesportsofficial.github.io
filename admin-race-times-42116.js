@@ -29,7 +29,7 @@ if(typeof request==='function'){
    const entry=editorRows.find(x=>String(x.driver_id)===String(r.driver_id));
    return {...r,time_display:entry?.time_display?.trim()||null};
   });
-  for(const r of payload.p_rows){const t=r.time_display;if(!t)continue;
+  for(const r of payload.p_rows){let t=r.time_display;if(!t)continue;if(r.status==='classified'&&Number(r.finishing_position)===1&&/^\d+:[0-5]\d\.\d{3}$/.test(t)){t='0:'+t;r.time_display=t;const entry=editorRows.find(x=>String(x.driver_id)===String(r.driver_id));if(entry)entry.time_display=t;}
    const valid=r.status==='classified'&&(Number(r.finishing_position)===1?/^\d+:[0-5]\d:[0-5]\d\.\d{3}$/.test(t):/^\+(?:\d+:[0-5]\d\.\d{3}|\d+\.\d{3}|[1-9]\d* gir[oi])$/.test(t));
    if(!valid)return Promise.reject(new Error('Formato tempo non valido per '+(r.driver_id||'pilota')+'. Usa 1:32:45.678 per il primo, +5.432 / +1 giro per gli altri.'));
   }
