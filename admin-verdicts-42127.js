@@ -44,31 +44,37 @@ async function pdf(){
  validate(true);if(dirty)throw Error('Salva prima i verdetti.');
  const race=(data.hydra_races||[]).find(r=>String(r.id)===raceSelect.value);if(!race)throw Error('Gara non trovata');
  const {jsPDF}=window.jspdf||{};if(!jsPDF)throw Error('Generatore PDF non disponibile.');
- const doc=new jsPDF({unit:'mm',format:'a4'}),W=210,M=15,R=195,navy=[12,31,62],blue=[23,55,100],gold=[198,161,91],ink=[31,44,62],muted=[102,115,132],pale=[245,247,251];
+
+ const doc=new jsPDF({unit:'mm',format:'a4'}),W=210,M=15,R=195,navy=[9,24,48],panel=[17,38,70],panelAlt=[23,46,81],gold=[204,165,89],white=[242,246,252],muted=[174,190,213];
  const clean=s=>String(s??'').replace(/[^\x20-\x7E\u00A0-\u00FF]/g,ch=>({'–':'-','—':'-','’':"'",'“':'"','”':'"','•':'-'}[ch]||'?'));
- let y=45;
- let logo=null;
+ let y=48,logo=null;
  try{const response=await fetch('hydra-logo.png',{cache:'force-cache'});if(response.ok){const blob=await response.blob();logo=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=reject;reader.readAsDataURL(blob)})}}catch(e){console.warn('HYDRA PDF logo unavailable',e)}
- function header(){doc.setFillColor(...navy);doc.rect(0,0,W,36,'F');doc.setFillColor(...gold);doc.rect(0,36,W,1.5,'F');if(logo){try{const prop=doc.getImageProperties(logo),ratio=prop.width/prop.height;const h=25,w=Math.min(32,h*ratio);doc.addImage(logo,'PNG',M,5,w,h)}catch(e){console.warn('HYDRA PDF logo invalid',e)}}doc.setTextColor(...gold);doc.setFont('helvetica','bold');doc.setFontSize(17);doc.text('HYDRA ESPORTS',logo?57:M,16);doc.setTextColor(230,234,243);doc.setFontSize(9);doc.text('DIREZIONE GARA  /  COMUNICATO UFFICIALE',logo?57:M,24);doc.setTextColor(...ink)}
- function footer(){const n=doc.getNumberOfPages();for(let p=1;p<=n;p++){doc.setPage(p);doc.setDrawColor(215,222,231);doc.line(M,283,R,283);doc.setFontSize(8);doc.setFont('helvetica','normal');doc.setTextColor(...muted);doc.text('HYDRA ESPORTS  |  DOCUMENTO UFFICIALE',M,290);doc.text('Pagina '+p+' / '+n,R,290,{align:'right'})}}
- function next(need=12){if(y+need>275){doc.addPage();header();y=46}}
- function sectionTitle(t){next(17);doc.setFillColor(...navy);doc.roundedRect(M,y,R-M,10,1.6,1.6,'F');doc.setTextColor(...gold);doc.setFont('helvetica','bold');doc.setFontSize(10);doc.text(clean(t),M+5,y+6.7);doc.setTextColor(...ink);y+=15}
- function paragraph(t,size=9,color=ink,x=M,maxWidth=R-M){doc.setFont('helvetica','normal');doc.setFontSize(size);doc.setTextColor(...color);const lines=doc.splitTextToSize(clean(t),maxWidth);next(lines.length*4.5+2);doc.text(lines,x,y);y+=lines.length*4.5+3;return lines.length}
- header();doc.setFont('helvetica','bold');doc.setFontSize(16);doc.setTextColor(...navy);doc.text(clean(race.circuit||'Gran Premio'),M,y+3);y+=10;
- doc.setFontSize(10);doc.setTextColor(...gold);doc.text('LEGA '+clean(race.league)+'  /  STAGIONE 1',M,y);y+=8;
- paragraph('Decisioni dei giudici e classifica post-gara  |  Emesso il '+new Date().toLocaleDateString('it-IT'),9,muted);y+=3;
- sectionTitle('VERDETTI DELLA DIREZIONE GARA');
+ function background(){doc.setFillColor(...navy);doc.rect(0,0,210,297,'F');doc.setFillColor(...panel);doc.rect(0,0,210,38,'F');doc.setFillColor(...gold);doc.rect(0,38,210,1.1,'F');doc.setDrawColor(37,62,99);doc.line(M,281,R,281);if(logo){try{const p=doc.getImageProperties(logo),h=28,w=Math.min(32,h*p.width/p.height);doc.addImage(logo,'PNG',M,4,w,h)}catch(e){console.warn('HYDRA PDF logo invalid',e)}}doc.setFont('helvetica','bold');doc.setFontSize(18);doc.setTextColor(...gold);doc.text('HYDRA ESPORTS',logo?55:M,17);doc.setFontSize(8.6);doc.setTextColor(...white);doc.text('DIREZIONE GARA  /  COMUNICATO UFFICIALE',logo?55:M,25)}
+ function newPage(){doc.addPage();background();y=49}
+ function ensure(h){if(y+h>274)newPage()}
+ function heading(t){ensure(16);doc.setFillColor(...panelAlt);doc.roundedRect(M,y,R-M,10,2,2,'F');doc.setFillColor(...gold);doc.rect(M,y,2,10,'F');doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(...gold);doc.text(clean(t),M+6,y+6.7);y+=15}
+ function paragraph(t,size=9,color=white,x=M,maxWidth=R-M){doc.setFont('helvetica','normal');doc.setFontSize(size);const lines=doc.splitTextToSize(clean(t),maxWidth);ensure(lines.length*4.5+3);doc.setTextColor(...color);doc.text(lines,x,y);y+=lines.length*4.5+3}
+ function verdictCard(v,i){const title='DECISIONE '+(i+1)+'  /  '+({penalty:'PENALITA',no_action:'NESSUNA SANZIONE',warning:'RICHIAMO',pending:'IN ESAME'}[v.verdict]||v.verdict).toUpperCase();const fields=[['RECLAMANTE',label(v.complainant_driver_id)],['PILOTA ESAMINATO',label(v.accused_driver_id)],['EPISODIO',v.incident],['MOTIVAZIONE',v.reason||'Non indicata'],['SANZIONE','+'+Number(v.penalty_seconds||0)+' secondi   |   -'+Number(v.penalty_coin||0)+' COIN']];doc.setFontSize(8.7);const parts=fields.map(([key,value])=>[key,doc.splitTextToSize(clean(value),R-M-14)]);const height=15+parts.reduce((n,[,lines])=>n+7+lines.length*4.15,0)+3;ensure(Math.min(height,220));let cardY=y;doc.setFillColor(...panel);doc.roundedRect(M,y,R-M,Math.min(height,274-y),2,2,'F');doc.setFillColor(...gold);doc.rect(M,y,2.1,11,'F');doc.setTextColor(...gold);doc.setFont('helvetica','bold');doc.setFontSize(10);doc.text(clean(title),M+6,y+7);y+=15;for(const [key,lines] of parts){if(y+7+lines.length*4.15>274){newPage();cardY=y;doc.setFillColor(...panel);doc.rect(M,y,R-M,Math.min(7+lines.length*4.15+6,274-y),'F')}doc.setFont('helvetica','bold');doc.setFontSize(7.3);doc.setTextColor(...gold);doc.text(key,M+7,y);y+=4.3;doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(...white);doc.text(lines,M+7,y);y+=lines.length*4.15+3}y+=8}
+ background();
+ doc.setFont('helvetica','bold');doc.setFontSize(18);doc.setTextColor(...white);doc.text(clean(race.circuit||'Gran Premio'),M,y+4);y+=13;
+ doc.setFontSize(10);doc.setTextColor(...gold);doc.text('LEGA '+clean(race.league)+'  /  STAGIONE 1',M,y);y+=9;
+ paragraph('Decisioni dei giudici   |   Emesso il '+new Date().toLocaleDateString('it-IT'),9,muted);y+=5;
+ heading('VERDETTI DELLA DIREZIONE GARA');
  if(!verdicts.length)paragraph('Nessun reclamo registrato per questa gara.');
- verdicts.forEach((v,i)=>{const title='DECISIONE '+(i+1)+'  -  '+({penalty:'PENALITA',no_action:'NESSUNA SANZIONE',warning:'RICHIAMO',pending:'IN ESAME'}[v.verdict]||v.verdict).toUpperCase();const parts=[['RECLAMANTE',label(v.complainant_driver_id)],['PILOTA ESAMINATO',label(v.accused_driver_id)],['EPISODIO',v.incident],['MOTIVAZIONE',v.reason||'Non indicata'],['SANZIONE','+'+Number(v.penalty_seconds||0)+' secondi  |  -'+Number(v.penalty_coin||0)+' COIN']];const heights=parts.map(([k,val])=>doc.splitTextToSize(clean(val),R-M-12).length*4.1+7);const cardHeight=12+heights.reduce((a,b)=>a+b,0)+3;next(Math.min(cardHeight,70));doc.setFillColor(...pale);doc.roundedRect(M,y,R-M,Math.min(cardHeight,275-y),2,2,'F');doc.setFillColor(...gold);doc.rect(M,y,2.2,10,'F');doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(...navy);doc.text(clean(title),M+6,y+7);y+=14;parts.forEach(([key,value],idx)=>{const lines=doc.splitTextToSize(clean(value),R-M-12);next(lines.length*4.1+7);doc.setFont('helvetica','bold');doc.setFontSize(7);doc.setTextColor(...muted);doc.text(key,M+6,y);y+=4;doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(...ink);doc.text(lines,M+6,y);y+=lines.length*4.1+3});y+=5});
- y+=2;sectionTitle('CLASSIFICA UFFICIALE POST DECISIONI');
+ verdicts.forEach((v,i)=>verdictCard(v,i));
+ // The classification always begins on a fresh page, independently of verdict count.
+ newPage();heading('CLASSIFICA UFFICIALE POST DECISIONI');
  const rows=editorRows.filter(r=>r.driver_id);
- function tableHeader(){doc.setFillColor(...blue);doc.rect(M,y,R-M,9,'F');doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(255,255,255);doc.text('POS',M+3,y+6);doc.text('PILOTA',M+19,y+6);doc.text('TEMPO / DISTACCO',M+105,y+6);doc.text('PEN.',M+156,y+6);y+=9}
+ const tableRowH=8.1;
+ function tableHeader(){doc.setFillColor(...gold);doc.rect(M,y,R-M,9,'F');doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(...navy);doc.text('POS',M+3,y+6);doc.text('PILOTA',M+19,y+6);doc.text('TEMPO / DISTACCO',M+105,y+6);doc.text('PEN.',M+157,y+6);y+=9}
  tableHeader();
- rows.forEach((r,i)=>{const pos=r.status==='classified'?String(r.finishing_position||i+1):String(r.status||'DNF').toUpperCase();const time=r.time_display||'--';const nameText=clean(label(r.driver_id));const h=8.5;next(h+2);if(y===46)tableHeader();doc.setFillColor(...(i%2===0?pale:[255,255,255]));doc.rect(M,y,R-M,h,'F');doc.setTextColor(...ink);doc.setFont('helvetica',i<3?'bold':'normal');doc.setFontSize(8.3);doc.text(clean(pos),M+3,y+5.8);doc.text(nameText.length>39?nameText.slice(0,38)+'...':nameText,M+19,y+5.8);doc.text(clean(time),M+105,y+5.8);doc.text('+'+Number(r.penalty_seconds||0)+'s',M+156,y+5.8);y+=h});
- y+=7;sectionTitle('RIEPILOGO MULTE COIN');
+ rows.forEach((r,i)=>{if(y+tableRowH>273){newPage();heading('CLASSIFICA  /  CONTINUA');tableHeader()}const pos=r.status==='classified'?String(r.finishing_position||i+1):String(r.status||'DNF').toUpperCase(),time=r.time_display||'--',nameText=clean(label(r.driver_id));doc.setFillColor(...(i%2===0?panel:panelAlt));doc.rect(M,y,R-M,tableRowH,'F');doc.setFont('helvetica',i<3?'bold':'normal');doc.setFontSize(8.6);doc.setTextColor(...(i<3?gold:white));doc.text(clean(pos),M+3,y+5.5);doc.setTextColor(...white);doc.text(nameText.length>39?nameText.slice(0,38)+'...':nameText,M+19,y+5.5);doc.text(clean(time),M+105,y+5.5);doc.text('+'+Number(r.penalty_seconds||0)+'s',M+157,y+5.5);y+=tableRowH});
+ y+=9;heading('RIEPILOGO MULTE COIN');
  const sums=new Map();verdicts.filter(v=>v.verdict==='penalty'&&Number(v.penalty_coin)>0).forEach(v=>{const row=rows.find(r=>String(r.driver_id)===String(v.accused_driver_id));const team=(data.hydra_teams||[]).find(t=>String(t.id)===String(row?.team_id));const name=team?.name||'Scuderia non assegnata';sums.set(name,(sums.get(name)||0)+Number(v.penalty_coin))});
  if(!sums.size)paragraph('Nessuna multa COIN applicata.',9);else sums.forEach((sum,team)=>paragraph(team+'   -'+sum+' COIN',9));
- footer();
+ const count=doc.getNumberOfPages();for(let p=1;p<=count;p++){doc.setPage(p);doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(...muted);doc.text('HYDRA ESPORTS  |  DIREZIONE GARA',M,288);doc.text('Pagina '+p+' / '+count,R,288,{align:'right'})}
+
+
  return {blob:doc.output('blob'),filename:'HYDRA_Verdetti_'+String(race.circuit||'GP').replace(/[^a-z0-9_-]/gi,'_')+'_Lega_'+race.league+'.pdf'};
 }
 const pdfStatus=document.createElement('div');pdfStatus.id='hydra-pdf-download-status';pdfStatus.setAttribute('role','status');pdfStatus.style.cssText='margin:10px 0;color:#e8d5a2;font-weight:600';(document.getElementById('hydra-final-actions')||section).insertAdjacentElement('afterend',pdfStatus);
