@@ -24,7 +24,7 @@ function hydraOvrRatings(){
  const drivers=data.hydra_drivers||[],raceList=(data.hydra_races||[]).filter(x=>x.status==='official').sort((a,b)=>Number(a.round_number)-Number(b.round_number)||String(a.race_date||'').localeCompare(String(b.race_date||'')));
  const results=data.hydra_results||[],byId=new Map(drivers.map(d=>[String(d.id),d])),byName=new Map(),scores=new Map();
  const key=d=>String(d.gamertag||'').trim().toLocaleLowerCase('it');
- for(const d of drivers){const k=key(d);if(!k)continue;if(!byName.has(k))byName.set(k,[]);byName.get(k).push(d);const lk=k+'|'+d.league;if(!scores.has(lk))scores.set(lk,{elo:d.league==='A'?1600:1400,starts:0,finish:0,q:0,ren:0,cos:0,rac:0})}
+ for(const d of drivers){const k=key(d);if(!k)continue;if(!byName.has(k))byName.set(k,[]);byName.get(k).push(d);const lk=k+'|'+d.league;if(!scores.has(lk))scores.set(lk,{elo:d.league==='A'?1600:1400,starts:0,finish:0,q:0,ren:0,cos:0,rac:0,streak:0})}
  const clamp=(n,lo=1,hi=99)=>Math.max(lo,Math.min(hi,Math.round(n)));
  for(const race of raceList){
   const field=results.filter(r=>String(r.race_id)===String(race.id)).map(r=>({...r,driver:byId.get(String(r.driver_id))})).filter(r=>r.driver&&r.driver.league===race.league&&r.status!=='dns'&&r.driver.archived!==true);
@@ -45,10 +45,10 @@ function hydraOvrRatings(){
     const actual=finished&&otherFinished?(pos<Number(other.finishing_position)?1:pos===Number(other.finishing_position)?.5:0):finished?1:otherFinished?0:.5;
     delta+=actual-expected;opponents++;
    }
-   const kFactor=s.starts<=2?25:s.starts<=4?24:s.starts<=6?22:20;
-   changes.set(key(r.driver)+'|'+r.driver.league,kFactor*(opponents?delta/opponents:0));
+   const averageDelta=opponents?delta/opponents:0;const nextStreak=averageDelta>0?s.streak+1:0;const kFactor=averageDelta>0?(nextStreak>=4?25:nextStreak===3?24:nextStreak===2?22:20):20;
+   changes.set(key(r.driver)+'|'+r.driver.league,{delta:kFactor*averageDelta,streak:nextStreak});
   }
-  for(const [k,change] of changes)scores.get(k).elo+=change;
+  for(const [k,change] of changes){scores.get(k).elo+=change.delta;scores.get(k).streak=change.streak;}
  }
  const out=new Map();
  for(const [name,records] of byName){
@@ -58,8 +58,8 @@ function hydraOvrRatings(){
   const total=played.reduce((n,s)=>n+s.starts,0),sum=prop=>played.reduce((n,s)=>n+s[prop],0),avg=prop=>sum(prop)/total;
   const ratingA=records.some(d=>d.league==='A'&&scores.get(name+'|A')?.starts);
   const leagueScore=ratingA?scores.get(name+'|A'):primary;
-  const ovr=ratingA?clamp(81+(leagueScore.elo-1500)/200*19,81,100):clamp(60+(leagueScore.elo-1300)/200*20,60,80);
-  const scoreA=scores.get(name+'|A'),scoreB=scores.get(name+'|B');const ovrA=scoreA?.starts?clamp(81+(scoreA.elo-1500)/200*19,81,100):null;const ovrB=scoreB?.starts?clamp(60+(scoreB.elo-1300)/200*20,60,80):null;out.set(name,{ovr,ovrA,ovrB,elo:Math.round(leagueScore.elo),vel:clamp(1+98*avg('q')),ren:clamp(1+98*avg('ren')),cos:clamp(1+98*avg('cos')),rac:clamp(1+98*avg('rac')),aff:clamp(100*(sum('finish')+2)/(total+2.5)),races:total});
+  const mapOvr=(elo,league)=>league==='A'?clamp((elo-700)/10,81,100):clamp(elo<=1400?70+(elo-1400)/10:70+(elo-1400)/6,60,80);const ovr=mapOvr(leagueScore.elo,ratingA?'A':'B');
+  const scoreA=scores.get(name+'|A'),scoreB=scores.get(name+'|B');const ovrA=scoreA?.starts?mapOvr(scoreA.elo,'A'):null;const ovrB=scoreB?.starts?mapOvr(scoreB.elo,'B'):null;out.set(name,{ovr,ovrA,ovrB,elo:Math.round(leagueScore.elo),vel:clamp(1+98*avg('q')),ren:clamp(1+98*avg('ren')),cos:clamp(1+98*avg('cos')),rac:clamp(1+98*avg('rac')),aff:clamp(100*(sum('finish')+2)/(total+2.5)),races:total});
  }
  return out;
 }
