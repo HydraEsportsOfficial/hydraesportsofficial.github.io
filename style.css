@@ -650,3 +650,6 @@ body {
 .attendance-team-heading:has(.attendance-team-logo[src*="redbullracing"]) .attendance-team-logo,
 .attendance-team-heading:has(.attendance-team-logo[src*="cadillac"]) .attendance-team-logo{filter:grayscale(1) brightness(1.35) contrast(1.25)}
 .attendance-team-heading:has(.attendance-team-logo[src*="cadillac"]) .attendance-team-logo{filter:grayscale(1) brightness(0) invert(1)}
+
+/* Gap to championship leader, shared by driver and constructor standings */
+.hydra-standings .standing-gap{color:#e54b55;font-size:.82em;font-weight:700;white-space:nowrap;margin-left:4px}
